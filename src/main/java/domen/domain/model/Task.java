@@ -1,9 +1,17 @@
 package domen.domain.model;
 
-public record Task(String title, String description, TaskSatus status) {
+import java.util.UUID;
 
-    public Task copyWith(String newTitle, String newDescription, TaskSatus newStatus) {
-        return new Task(newTitle != null ? newTitle : this.title,
+public record Task(String id, String title, String description, TaskStatus status) {
+
+    public Task(String title, String description, TaskStatus status) {
+        this(UUID.randomUUID().toString(), title, description, status);
+    }
+
+    public Task copyWith(String newTitle, String newDescription, TaskStatus newStatus) {
+        return new Task(
+                this.id,
+                newTitle != null ? newTitle : this.title,
                 newDescription != null ? newDescription : this.description,
                 newStatus != null ? newStatus : this.status);
 

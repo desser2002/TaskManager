@@ -2,7 +2,9 @@ package domen.domain;
 
 import domen.domain.exception.TaskNotFoundException;
 import domen.domain.model.Task;
-import domen.domain.model.TaskSatus;
+import domen.domain.model.TaskStatus;
+
+import java.util.Optional;
 
 public class TaskService {
     private final TaskRepository taskRepository;
@@ -15,20 +17,20 @@ public class TaskService {
         if (title == null || title.isEmpty()) {
             throw new IllegalArgumentException("Title cannot be null or empty");
         }
-        Task task = new Task(title, description, TaskSatus.NEW);
+        Task task = new Task(title, description, TaskStatus.NEW);
         taskRepository.save(task);
         return task;
     }
 
-    public Task upadateTask(String id, String newTitle, String newDescription, TaskSatus newStatus) {
+    public Task updateTask(String id, String newTitle, String newDescription, TaskStatus newStatus) {
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("ID cannot be null or empty");
         }
 
-        Task existingTask = taskRepository.findById(id);
-        if (existingTask == null) {
-            throw new TaskNotFoundException("Task with id " + id + " not found");
-        }
+        Optional<Task> optionalTask = taskRepository.findById(id);
+        Task existingTask = optionalTask.orElseThrow(() ->
+                new TaskNotFoundException("Task with id " + id + " not found"));
+
         Task updatedTask = existingTask.copyWith(newTitle, newDescription, newStatus);
         taskRepository.update(updatedTask);
         return updatedTask;

@@ -1,6 +1,6 @@
 package domen.domain.model;
 
-public enum TaskSatus {
+public enum TaskStatus {
     NEW,
     IN_PROGRESS,
     DONE
