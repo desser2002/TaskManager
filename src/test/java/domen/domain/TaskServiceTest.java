@@ -52,7 +52,7 @@ class TaskServiceTest {
     void shouldUpdateTask() {
         //given
         String id = "1";
-        Task original = new Task(id,"Old title", "Old desc", TaskStatus.NEW);
+        Task original = new Task(id, "Old title", "Old desc", TaskStatus.NEW);
         when(taskRepository.findById(id)).thenReturn(Optional.of(original));
 
         //when
@@ -83,7 +83,7 @@ class TaskServiceTest {
     void shouldUpdateOnlyNotNull() {
         //given
         String id = "1";
-        Task original = new Task(id,"Old title", "Old desc", TaskStatus.NEW);
+        Task original = new Task(id, "Old title", "Old desc", TaskStatus.NEW);
         when(taskRepository.findById(id)).thenReturn(Optional.of(original));
 
         //when
@@ -107,15 +107,14 @@ class TaskServiceTest {
     }
 
     @Test
-    void shouldNotCallUpdate()
-    {
+    void shouldNotCallUpdate() {
         //given
-        when (taskRepository.findById("id")).thenReturn(null);
+        when(taskRepository.findById("id")).thenReturn(null);
         //when/then
         assertThrows(TaskNotFoundException.class, () ->
                 taskService.updateTask("id", "New title", "New desc", TaskStatus.IN_PROGRESS)
         );
-        verify (taskRepository,never()).update(any());
+        verify(taskRepository, never()).update(any());
     }
 
 

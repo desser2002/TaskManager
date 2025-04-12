@@ -5,6 +5,7 @@ import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class TaskService {
     private final TaskRepository taskRepository;
@@ -17,7 +18,7 @@ public class TaskService {
         if (title == null || title.isEmpty()) {
             throw new IllegalArgumentException("Title cannot be null or empty");
         }
-        Task task = new Task(title, description, TaskStatus.NEW);
+        Task task = new Task(UUID.randomUUID().toString(), title, description, TaskStatus.NEW);
         taskRepository.save(task);
         return task;
     }
@@ -27,11 +28,10 @@ public class TaskService {
             throw new IllegalArgumentException("ID cannot be null or empty");
         }
 
-        Optional<Task> optionalTask = taskRepository.findById(id);
-        Task existingTask = optionalTask.orElseThrow(() ->
-                new TaskNotFoundException("Task with id " + id + " not found"));
+        Task updatedTask = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException("Task with id " + id + " not found"))
+                .copyWith(newTitle, newDescription, newStatus);
 
-        Task updatedTask = existingTask.copyWith(newTitle, newDescription, newStatus);
         taskRepository.update(updatedTask);
         return updatedTask;
     }
