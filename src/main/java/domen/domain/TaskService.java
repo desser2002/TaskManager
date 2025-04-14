@@ -15,20 +15,17 @@ public class TaskService {
     }
 
     public Task create(String title, String description) {
-        if (title == null || title.isBlank())
-            throw new IllegalArgumentException("Title cannot be null or empty");
-
-        Task task = new Task(UUID.randomUUID().toString(), title, description, TaskStatus.NEW, null, null);
-        taskRepository.save(task);
-        return task;
+        return buildAndSaveTask(title, description, null, null);
     }
 
     public Task create(String title, String description, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
+        validateTaskDateTime(startDateTime, finishDateTime);
+        return buildAndSaveTask(title, description, startDateTime, finishDateTime);
+    }
+
+    private Task buildAndSaveTask(String title, String description, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
         if (title == null || title.isBlank())
             throw new IllegalArgumentException("Title cannot be null or empty");
-
-        validateTaskDateTime(startDateTime, finishDateTime);
-
         Task task = new Task(UUID.randomUUID().toString(), title, description, TaskStatus.NEW, startDateTime, finishDateTime);
         taskRepository.save(task);
         return task;
