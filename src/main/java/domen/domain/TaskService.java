@@ -32,7 +32,7 @@ public class TaskService {
     }
 
     public Task update(String id, String newTitle, String newDescription, TaskStatus newStatus) {
-        Task updatedTask = getTaskOrThrow(id).copyWithUpdate(newTitle, newDescription, newStatus);
+        Task updatedTask = getTask(id).copyWithUpdate(newTitle, newDescription, newStatus);
 
         taskRepository.update(updatedTask);
         return updatedTask;
@@ -40,13 +40,13 @@ public class TaskService {
 
     public Task assignTime(String id, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
         validateTaskDateTime(startDateTime, finishDateTime);
-        Task updatedTask = getTaskOrThrow(id).copyWithUpdate(startDateTime, finishDateTime);
+        Task updatedTask = getTask(id).copyWithUpdate(startDateTime, finishDateTime);
 
         taskRepository.update(updatedTask);
         return updatedTask;
     }
 
-    private Task getTaskOrThrow(String id) {
+    private Task getTask(String id) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("ID cannot be null or empty");
         }
