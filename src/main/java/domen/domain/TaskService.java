@@ -4,9 +4,7 @@ import domen.domain.exception.TaskNotFoundException;
 import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 public class TaskService {
@@ -16,8 +14,17 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
+    public Task create(String title, String description) {
+        if (title == null || title.isBlank())
+            throw new IllegalArgumentException("Title cannot be null or empty");
+
+        Task task = new Task(UUID.randomUUID().toString(), title, description, TaskStatus.NEW, null, null);
+        taskRepository.save(task);
+        return task;
+    }
+
     public Task create(String title, String description, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
-        if (title == null || title.isEmpty())
+        if (title == null || title.isBlank())
             throw new IllegalArgumentException("Title cannot be null or empty");
 
         validateTaskDateTime(startDateTime, finishDateTime);
@@ -27,20 +34,27 @@ public class TaskService {
         return task;
     }
 
-    public Task update(String id, String newTitle, String newDescription, TaskStatus newStatus, LocalDateTime newStartDateTime, LocalDateTime newFinishDateTime) {
+    public Task update(String id, String newTitle, String newDescription, TaskStatus newStatus) {
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("ID cannot be null or empty");
         }
 
-
         Task updatedTask = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task with id " + id + " not found"))
-                .copyWith(newTitle, newDescription, newStatus, newStartDateTime, newFinishDateTime);
+                .copyWithUpdate(newTitle, newDescription, newStatus);
 
-        LocalDateTime updatedStartDateTime = newStartDateTime != null ? newStartDateTime : updatedTask.startDateTime();
-        LocalDateTime updatedFinishDateTime = newFinishDateTime != null ? newFinishDateTime : updatedTask.finishDateTime();
+        taskRepository.update(updatedTask);
+        return updatedTask;
+    }
 
-        validateTaskDateTime(updatedStartDateTime, updatedFinishDateTime);
+    public Task assignTime(String id, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("ID cannot be null or empty");
+        }
+        validateTaskDateTime(startDateTime, finishDateTime);
+        Task updatedTask = taskRepository.findById(id).
+                orElseThrow(() -> new TaskNotFoundException("Task with id " + id + " not found"))
+                .copyWithUpdate(startDateTime, finishDateTime);
 
         taskRepository.update(updatedTask);
         return updatedTask;

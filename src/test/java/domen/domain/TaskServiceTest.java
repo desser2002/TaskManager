@@ -43,10 +43,8 @@ class TaskServiceTest {
 
     @Test
     void shouldNotCreateTask() {
-        //given
-        String invalidTitle = null;
         //when then
-        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> taskService.create(invalidTitle, "", null, null));
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> taskService.create(null, "", null, null));
         assertEquals("Title cannot be null or empty", illegalArgumentException.getMessage());
     }
 
@@ -58,7 +56,7 @@ class TaskServiceTest {
         when(taskRepository.findById(id)).thenReturn(Optional.of(original));
 
         //when
-        Task updated = taskService.update(id, "New title", "New desc", TaskStatus.IN_PROGRESS, null, null);
+        Task updated = taskService.update(id, "New title", "New desc", TaskStatus.IN_PROGRESS);
 
         //then
         assertNotNull(updated);
@@ -75,7 +73,7 @@ class TaskServiceTest {
         when(taskRepository.findById(id)).thenReturn(Optional.empty());
         //when then
         TaskNotFoundException ex = assertThrows(TaskNotFoundException.class, () ->
-                taskService.update(id, "New title", "New desc", TaskStatus.IN_PROGRESS, null, null)
+                taskService.update(id, "New title", "New desc", TaskStatus.IN_PROGRESS)
         );
         assertEquals("Task with id " + id + " not found", ex.getMessage());
 
@@ -89,7 +87,7 @@ class TaskServiceTest {
         when(taskRepository.findById(id)).thenReturn(Optional.of(original));
 
         //when
-        Task updated = taskService.update(id, "New title", null, null, null, null);
+        Task updated = taskService.update(id, "New title", null, null);
 
         //then
         assertNotNull(updated);
@@ -104,7 +102,7 @@ class TaskServiceTest {
     void shouldNotUpdateNullId() {
         //when then
         assertThrows(IllegalArgumentException.class, () ->
-                taskService.update(null, "New title", "Description", TaskStatus.NEW, null, null)
+                taskService.update(null, "New title", "Description", TaskStatus.NEW)
         );
     }
 
@@ -114,7 +112,7 @@ class TaskServiceTest {
         when(taskRepository.findById("id")).thenReturn(Optional.empty());
         //when/then
         assertThrows(TaskNotFoundException.class, () ->
-                taskService.update("id", "New title", "New desc", TaskStatus.IN_PROGRESS, null, null)
+                taskService.update("id", "New title", "New desc", TaskStatus.IN_PROGRESS)
         );
         verify(taskRepository, never()).update(any());
     }
@@ -130,6 +128,26 @@ class TaskServiceTest {
                 taskService.create("Title", "Description", start, finish)
         );
         assertEquals("Start date cannot be after finish time", ex.getMessage());
+    }
+
+    @Test
+    void shouldAssignTime() {
+        // given
+        String id = "1";
+        Task original = new Task(id, "Title", "Desc", TaskStatus.NEW, null, null);
+        when(taskRepository.findById(id)).thenReturn(Optional.of(original));
+
+        LocalDateTime start = LocalDateTime.now().plusDays(1);
+        LocalDateTime finish = LocalDateTime.now().plusDays(2);
+
+        // when
+        Task updated = taskService.assignTime(id, start, finish);
+
+        // then
+        assertNotNull(updated);
+        assertEquals(start, updated.startDateTime());
+        assertEquals(finish, updated.finishDateTime());
+        verify(taskRepository).update(updated);
     }
 
     @Test
@@ -154,10 +172,9 @@ class TaskServiceTest {
         when(taskRepository.findById(id)).thenReturn(Optional.of(original));
         //when throws
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                taskService.update(id, "Title", "Description", TaskStatus.NEW, start, finish)
+                taskService.assignTime(id, start, finish)
         );
         assertEquals("Start date cannot be after finish time", ex.getMessage());
     }
-
 
 }
