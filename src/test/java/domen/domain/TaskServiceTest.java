@@ -189,7 +189,7 @@ class TaskServiceTest {
         when(taskRepository.getAll()).thenReturn(List.of(task1, task2, task3, task4));
 
         //when
-        List<Task> allTasks = taskRepository.getAll();
+        List<Task> allTasks = taskService.getAllTasks();
 
         //then
         assertEquals(4, allTasks.size());
@@ -233,14 +233,14 @@ class TaskServiceTest {
         when(taskRepository.getAll()).thenReturn(List.of(task1, task2, task3, task4));
 
         //when
-        List<Task> activeTasks = taskService.getCompletedTasks();
+        List<Task> completedTasks = taskService.getCompletedTasks();
 
         //then
-        assertEquals(1, activeTasks.size());
-        assertFalse(activeTasks.contains(task1));
-        assertFalse(activeTasks.contains(task2));
-        assertTrue(activeTasks.contains(task3));
-        assertFalse(activeTasks.contains(task4));
+        assertEquals(1, completedTasks.size());
+        assertFalse(completedTasks.contains(task1));
+        assertFalse(completedTasks.contains(task2));
+        assertTrue(completedTasks.contains(task3));
+        assertFalse(completedTasks.contains(task4));
 
     }
 
@@ -255,14 +255,14 @@ class TaskServiceTest {
         when(taskRepository.getAll()).thenReturn(List.of(task1, task2, task3, task4));
 
         //when
-        List<Task> activeTasks = taskService.getOverdueTasks();
+        List<Task> overdueTasks = taskService.getOverdueTasks();
 
         //then
-        assertEquals(1, activeTasks.size());
-        assertFalse(activeTasks.contains(task1));
-        assertFalse(activeTasks.contains(task2));
-        assertFalse(activeTasks.contains(task3));
-        assertTrue(activeTasks.contains(task4));
+        assertEquals(1, overdueTasks.size());
+        assertFalse(overdueTasks.contains(task1));
+        assertFalse(overdueTasks.contains(task2));
+        assertFalse(overdueTasks.contains(task3));
+        assertTrue(overdueTasks.contains(task4));
 
     }
 }

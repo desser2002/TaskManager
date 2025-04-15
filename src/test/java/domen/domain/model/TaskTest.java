@@ -1,16 +1,13 @@
-package domen.domain;
+package domen.domain.model;import static org.junit.jupiter.api.Assertions.*;
 
-import domen.domain.model.Task;
-import domen.domain.model.TaskStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
 
-class TaskModelTest {
+class TaskTest {
 
     @ParameterizedTest
     @CsvSource({
