@@ -82,7 +82,7 @@ public class TaskService {
         return filterTasks(Task::isOverdue);
     }
 
-    public List<Task> filterTasks(Predicate<Task> predicate) {
+    private List<Task> filterTasks(Predicate<Task> predicate) {
         return taskRepository.getAll().stream()
                 .filter(predicate)
                 .collect(Collectors.toList());
