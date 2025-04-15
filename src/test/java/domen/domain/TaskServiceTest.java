@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -177,4 +178,91 @@ class TaskServiceTest {
         assertEquals("Start date cannot be after finish time", ex.getMessage());
     }
 
+    @Test
+    void shouldReturnAllTask() {
+        //given
+        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null);
+        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null);
+        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null);
+        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2));
+
+        when(taskRepository.getAll()).thenReturn(List.of(task1, task2, task3, task4));
+
+        //when
+        List<Task> allTasks = taskRepository.getAll();
+
+        //then
+        assertEquals(4, allTasks.size());
+        assertTrue(allTasks.contains(task1));
+        assertTrue(allTasks.contains(task2));
+        assertTrue(allTasks.contains(task3));
+        assertTrue(allTasks.contains(task4));
+    }
+
+
+    @Test
+    void shouldReturnOnlyActiveTasks() {
+        //given
+        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null);
+        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null);
+        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null);
+        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2));
+
+        when(taskRepository.getAll()).thenReturn(List.of(task1, task2, task3, task4));
+
+        //when
+        List<Task> activeTasks = taskService.getActiveTasks();
+
+        //then
+        assertEquals(3, activeTasks.size());
+        assertTrue(activeTasks.contains(task1));
+        assertTrue(activeTasks.contains(task2));
+        assertFalse(activeTasks.contains(task3));
+        assertTrue(activeTasks.contains(task4));
+
+    }
+
+    @Test
+    void shouldReturnOnlyCompletedTasks() {
+        //given
+        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null);
+        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null);
+        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null);
+        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2));
+
+        when(taskRepository.getAll()).thenReturn(List.of(task1, task2, task3, task4));
+
+        //when
+        List<Task> activeTasks = taskService.getCompletedTasks();
+
+        //then
+        assertEquals(1, activeTasks.size());
+        assertFalse(activeTasks.contains(task1));
+        assertFalse(activeTasks.contains(task2));
+        assertTrue(activeTasks.contains(task3));
+        assertFalse(activeTasks.contains(task4));
+
+    }
+
+    @Test
+    void shouldReturnOnlyOverdueTasks() {
+        //given
+        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null);
+        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null);
+        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null);
+        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2));
+
+        when(taskRepository.getAll()).thenReturn(List.of(task1, task2, task3, task4));
+
+        //when
+        List<Task> activeTasks = taskService.getOverdueTasks();
+
+        //then
+        assertEquals(1, activeTasks.size());
+        assertFalse(activeTasks.contains(task1));
+        assertFalse(activeTasks.contains(task2));
+        assertFalse(activeTasks.contains(task3));
+        assertTrue(activeTasks.contains(task4));
+
+    }
 }
