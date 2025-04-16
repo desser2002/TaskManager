@@ -27,4 +27,17 @@ public record Task(String id, String title, String description, TaskStatus statu
                 newStartDateTime != null ? newStartDateTime : this.startDateTime,
                 newFinishDateTime != null ? newFinishDateTime : this.finishDateTime);
     }
+
+    public boolean isActive() {
+        return status == TaskStatus.NEW || status == TaskStatus.IN_PROGRESS;
+    }
+
+    public boolean isCompleted() {
+        return status == TaskStatus.DONE;
+    }
+
+    public boolean isOverdue() {
+        return finishDateTime != null && !isCompleted() && finishDateTime.isBefore(LocalDateTime.now());
+    }
+
 }

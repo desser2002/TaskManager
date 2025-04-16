@@ -5,7 +5,10 @@ import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class TaskService {
     private final TaskRepository taskRepository;
@@ -62,4 +65,27 @@ public class TaskService {
         if (finishDateTime.isBefore(LocalDateTime.now()))
             throw new IllegalArgumentException("Finish date cannot be before current time");
     }
+
+    public List<Task> getAllTasks() {
+        return taskRepository.getAll();
+    }
+
+    public List<Task> getActiveTasks() {
+        return filterTasks(Task::isActive);
+    }
+
+    public List<Task> getCompletedTasks() {
+        return filterTasks(Task::isCompleted);
+    }
+
+    public List<Task> getOverdueTasks() {
+        return filterTasks(Task::isOverdue);
+    }
+
+    private List<Task> filterTasks(Predicate<Task> predicate) {
+        return taskRepository.getAll().stream()
+                .filter(predicate)
+                .collect(Collectors.toList());
+    }
+
 }
