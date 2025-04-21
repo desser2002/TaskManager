@@ -13,6 +13,4 @@ public interface TaskRepository {
     void update(Task updatedTask);
 
     List<Task> getAll();
-
-
 }

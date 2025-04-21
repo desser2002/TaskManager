@@ -64,7 +64,9 @@ public record Task(String id, String title, String description, TaskStatus statu
     }
 
     public Task updateSubtask(Subtask updatedSubtask) {
-        LinkedHashSet<Subtask> updatedSubtasks = subtasks.stream().map(s -> s.id().equals(updatedSubtask.id()) ? updatedSubtask : s).collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashSet<Subtask> updatedSubtasks = subtasks.stream()
+                .map(s -> s.id().equals(updatedSubtask.id()) ? updatedSubtask : s)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
         return copyWithUpdate(updatedSubtasks);
     }
 
