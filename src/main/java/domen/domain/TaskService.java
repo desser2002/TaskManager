@@ -1,10 +1,13 @@
 package domen.domain;
 
 import domen.domain.exception.TaskNotFoundException;
+import domen.domain.model.Subtask;
 import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -29,7 +32,16 @@ public class TaskService {
     private Task buildAndSaveTask(String title, String description, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
         if (title == null || title.isBlank())
             throw new IllegalArgumentException("Title cannot be null or empty");
-        Task task = new Task(UUID.randomUUID().toString(), title, description, TaskStatus.NEW, startDateTime, finishDateTime);
+
+        LinkedHashSet<Subtask> subtasks = new LinkedHashSet<>();
+        Task task = new Task(UUID.randomUUID().toString(),
+                title,
+                description,
+                TaskStatus.NEW,
+                startDateTime,
+                finishDateTime,
+                subtasks
+        );
         taskRepository.save(task);
         return task;
     }
@@ -39,6 +51,13 @@ public class TaskService {
 
         taskRepository.update(updatedTask);
         return updatedTask;
+    }
+
+    public Task update(String id, Subtask updatedSubtask) {
+        Task task = getTask(id);
+        Task updateTask = task.updateSubtask(updatedSubtask);
+        taskRepository.update(updateTask);
+        return updateTask;
     }
 
     public Task assignTime(String id, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
@@ -86,6 +105,25 @@ public class TaskService {
         return taskRepository.getAll().stream()
                 .filter(predicate)
                 .collect(Collectors.toList());
+    }
+
+    public Task createSubtask(String taskId, String title, String description) {
+        if (title == null || title.isBlank())
+            throw new IllegalArgumentException("Title cannot be null or empty");
+        Subtask subtask = new Subtask(UUID.randomUUID().toString(), title, description, TaskStatus.NEW);
+        Task task = addSubtask(taskId, subtask);
+        return task;
+    }
+
+    private Task addSubtask(String taskId, Subtask subtask) {
+        Task task = getTask(taskId);
+        Task updatedtask = task.addSubtask(subtask);
+        taskRepository.update(updatedtask);
+        return updatedtask;
+    }
+
+    public LinkedHashSet<Subtask> getSubtasks(String taskId) {
+        return getTask(taskId).subtasks();
     }
 
 }

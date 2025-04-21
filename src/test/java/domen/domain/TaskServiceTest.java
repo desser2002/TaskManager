@@ -1,6 +1,7 @@
 package domen.domain;
 
 import domen.domain.exception.TaskNotFoundException;
+import domen.domain.model.Subtask;
 import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 
@@ -11,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,7 +55,7 @@ class TaskServiceTest {
     void shouldUpdateTask() {
         //given
         String id = "1";
-        Task original = new Task(id, "Old title", "Old desc", TaskStatus.NEW, null, null);
+        Task original = new Task(id, "Old title", "Old desc", TaskStatus.NEW, null, null, null);
         when(taskRepository.findById(id)).thenReturn(Optional.of(original));
 
         //when
@@ -84,7 +86,7 @@ class TaskServiceTest {
     void shouldUpdateOnlyNotNull() {
         //given
         String id = "1";
-        Task original = new Task(id, "Old title", "Old desc", TaskStatus.NEW, null, null);
+        Task original = new Task(id, "Old title", "Old desc", TaskStatus.NEW, null, null, null);
         when(taskRepository.findById(id)).thenReturn(Optional.of(original));
 
         //when
@@ -135,7 +137,7 @@ class TaskServiceTest {
     void shouldAssignTime() {
         // given
         String id = "1";
-        Task original = new Task(id, "Title", "Desc", TaskStatus.NEW, null, null);
+        Task original = new Task(id, "Title", "Desc", TaskStatus.NEW, null, null, null);
         when(taskRepository.findById(id)).thenReturn(Optional.of(original));
 
         LocalDateTime start = LocalDateTime.now().plusDays(1);
@@ -169,7 +171,7 @@ class TaskServiceTest {
         LocalDateTime start = LocalDateTime.now().plusDays(2);
         LocalDateTime finish = LocalDateTime.now().plusDays(1);
 
-        Task original = new Task(id, "Old title", "Old desc", TaskStatus.NEW, null, null);
+        Task original = new Task(id, "Old title", "Old desc", TaskStatus.NEW, null, null, null);
         when(taskRepository.findById(id)).thenReturn(Optional.of(original));
         //when throws
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
@@ -181,10 +183,10 @@ class TaskServiceTest {
     @Test
     void shouldReturnAllTask() {
         //given
-        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null);
-        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null);
-        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null);
-        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2));
+        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null, null);
+        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null, null);
+        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null, null);
+        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2), null);
 
         when(taskRepository.getAll()).thenReturn(List.of(task1, task2, task3, task4));
 
@@ -203,10 +205,10 @@ class TaskServiceTest {
     @Test
     void shouldReturnOnlyActiveTasks() {
         //given
-        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null);
-        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null);
-        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null);
-        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2));
+        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null, null);
+        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null, null);
+        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null, null);
+        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2), null);
 
         when(taskRepository.getAll()).thenReturn(List.of(task1, task2, task3, task4));
 
@@ -225,10 +227,10 @@ class TaskServiceTest {
     @Test
     void shouldReturnOnlyCompletedTasks() {
         //given
-        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null);
-        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null);
-        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null);
-        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2));
+        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null, null);
+        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null, null);
+        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null, null);
+        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2), null);
 
         when(taskRepository.getAll()).thenReturn(List.of(task1, task2, task3, task4));
 
@@ -247,10 +249,10 @@ class TaskServiceTest {
     @Test
     void shouldReturnOnlyOverdueTasks() {
         //given
-        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null);
-        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null);
-        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null);
-        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2));
+        Task task1 = new Task("1", "Title", "Desc", TaskStatus.NEW, null, null, null);
+        Task task2 = new Task("2", "Title", "Desc", TaskStatus.IN_PROGRESS, null, null, null);
+        Task task3 = new Task("3", "Title", "Desc", TaskStatus.DONE, null, null, null);
+        Task task4 = new Task("4", "Title", "Desc", TaskStatus.NEW, null, LocalDateTime.now().minusDays(2), null);
 
         when(taskRepository.getAll()).thenReturn(List.of(task1, task2, task3, task4));
 
@@ -265,4 +267,49 @@ class TaskServiceTest {
         assertTrue(overdueTasks.contains(task4));
 
     }
+
+    @Test
+    public void shouldCreateSubtask() {
+        //given
+        String taskId = "1";
+        Task originaltask = new Task(taskId, "Title", "Desc", TaskStatus.NEW, null, null, new LinkedHashSet<>());
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(originaltask));
+        //when
+        Task updatedTask = taskService.createSubtask(taskId, "Subtask title", "Subtask desc");
+
+        //then
+        assertNotNull(updatedTask);
+        assertEquals(1, updatedTask.subtasks().size());
+        Subtask subtask = updatedTask.subtasks().getFirst();
+        assertEquals("Subtask title", subtask.title());
+        assertEquals("Subtask desc", subtask.description());
+        assertEquals(TaskStatus.NEW, subtask.status());
+
+        verify(taskRepository).update(updatedTask);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenSubtaskTitleIsNull() {
+        String taskId = "1";
+        Task task = new Task(taskId, "Task title", "Task desc", TaskStatus.NEW, null, null, new LinkedHashSet<>());
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> taskService.createSubtask(taskId, null, "Subtask desc"));
+
+        assertEquals("Title cannot be null or empty", ex.getMessage());
+
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenTaskNotFound() {
+        //given
+        String taskId = "1";
+        Task task = new Task(taskId, "Title", "Desc", TaskStatus.NEW, null, null, new LinkedHashSet<>());
+        when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
+        //when then
+        TaskNotFoundException ex = assertThrows(TaskNotFoundException.class, () -> taskService.createSubtask(taskId, "Subtask title", "Subtask desc"));
+        assertEquals("Task with id " + taskId + " not found", ex.getMessage());
+    }
+
 }
