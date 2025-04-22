@@ -16,7 +16,7 @@ class TaskTest {
             "DONE, false"
     })
     void isActive_shouldReturnExpectedValue(TaskStatus status, boolean expected) {
-        Task task = new Task("id", "title", "desc", status, null, null);
+        Task task = new Task("id", "title", "desc", status, null, null,null);
         assertEquals(expected, task.isActive());
     }
 
@@ -27,14 +27,14 @@ class TaskTest {
             "DONE, true"
     })
     void isCompleted_shouldReturnExpectedValue(TaskStatus status, boolean expected) {
-        Task task = new Task("id", "title", "desc", status, null, null);
+        Task task = new Task("id", "title", "desc", status, null, null,null);
         assertEquals(expected, task.isCompleted());
     }
 
     @Test
     void shouldReturnTrueIfFinishTimeInPastAndNotCompleted() {
         LocalDateTime past = LocalDateTime.now().minusDays(1);
-        Task task = new Task("1", "Title", "Desc", TaskStatus.NEW, null, past);
+        Task task = new Task("1", "Title", "Desc", TaskStatus.NEW, null, past,null);
 
         assertTrue(task.isOverdue());
     }
@@ -42,7 +42,7 @@ class TaskTest {
     @Test
     void shouldReturnFalseIfFinishedButAlreadyCompleted() {
         LocalDateTime past = LocalDateTime.now().minusDays(1);
-        Task task = new Task("2", "Title", "Desc", TaskStatus.DONE, null, past);
+        Task task = new Task("2", "Title", "Desc", TaskStatus.DONE, null, past,null);
 
         assertFalse(task.isOverdue());
     }
@@ -50,14 +50,14 @@ class TaskTest {
     @Test
     void shouldReturnFalseIfFinishTimeInFuture() {
         LocalDateTime future = LocalDateTime.now().plusDays(1);
-        Task task = new Task("3", "Title", "Desc", TaskStatus.NEW, null, future);
+        Task task = new Task("3", "Title", "Desc", TaskStatus.NEW, null, future,null);
 
         assertFalse(task.isOverdue());
     }
 
     @Test
     void shouldReturnFalseIfFinishTimeIsNull() {
-        Task task = new Task("4", "Title", "Desc", TaskStatus.NEW, null, null);
+        Task task = new Task("4", "Title", "Desc", TaskStatus.NEW, null, null,null);
 
         assertFalse(task.isOverdue());
     }
