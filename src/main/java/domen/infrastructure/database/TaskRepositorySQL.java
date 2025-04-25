@@ -3,25 +3,25 @@ package domen.infrastructure.database;
 import domen.domain.TaskRepository;
 import domen.domain.model.Task;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class TaskRepositorySQL implements TaskRepository {
+    private static final String SAVE_STATEMENT = "INSERT INTO task (id, title, description, status, start_date_time, finish_date_time) VALUES (?::uuid,?,?,?::task_status,?::timestamp,?::timestamp)";
+
     @Override
     public void save(Task task) {
-        String saveStatement = "INSERT INTO task (id, title, description, status, start_date_time, finish_date_time) VALUES (?::uuid,?,?,?::task_status,?::timestamp,?::timestamp)";
 
         try (Connection connection = getConnection();
-             var preparedStatement = connection.prepareStatement(saveStatement)) {
+             PreparedStatement ps = prepareSaveTaskStatement(task, connection)) {
 
-            mapTaskToStatement(task, preparedStatement);
-            preparedStatement.executeUpdate();
+            ps.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error during writing task info to database", e);
         }
 
     }
@@ -41,22 +41,34 @@ public class TaskRepositorySQL implements TaskRepository {
         return List.of();
     }
 
-    public static Connection getConnection() {
-        Connection connection = null;
-        try {
-            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/TaskManager", "admin", "admin");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return connection;
+    private static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/TaskManager",
+                "admin",
+                "admin"
+        );
     }
 
-    private void mapTaskToStatement(Task task, java.sql.PreparedStatement ps) throws SQLException {
-        ps.setString(1, task.id());
+
+    private PreparedStatement prepareSaveTaskStatement(Task task, Connection connection) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement(SAVE_STATEMENT);
+
+        ps.setObject(1, UUID.fromString(task.id()));
         ps.setString(2, task.title());
-        ps.setString(3, task.description()!=null ? task.description() : null);
+        ps.setString(3, task.description());
         ps.setString(4, task.status().toString());
-        ps.setString(5, task.startDateTime() != null ? task.startDateTime().toString() : null);
-        ps.setString(6, task.finishDateTime() != null ? task.finishDateTime().toString() : null);
+        if (task.startDateTime() != null) {
+            ps.setTimestamp(5, Timestamp.valueOf(task.startDateTime()));
+        } else {
+            ps.setNull(5, java.sql.Types.TIMESTAMP);
+        }
+
+        if (task.finishDateTime() != null) {
+            ps.setTimestamp(6, Timestamp.valueOf(task.finishDateTime()));
+        } else {
+            ps.setNull(6, java.sql.Types.TIMESTAMP);
+        }
+
+        return ps;
     }
 }
