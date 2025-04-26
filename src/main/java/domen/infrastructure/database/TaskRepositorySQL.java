@@ -10,7 +10,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class TaskRepositorySQL implements TaskRepository {
-    private static final String SAVE_STATEMENT = "INSERT INTO task (id, title, description, status, start_date_time, finish_date_time) VALUES (?::uuid,?,?,?::task_status,?::timestamp,?::timestamp)";
+    private static final String SAVE_STATEMENT = "INSERT INTO task (id, title, description, status, start_date_time, finish_date_time)" +
+            " VALUES (?::uuid,?,?,?::task_status,?::timestamp,?::timestamp)";
 
     @Override
     public void save(Task task) {
