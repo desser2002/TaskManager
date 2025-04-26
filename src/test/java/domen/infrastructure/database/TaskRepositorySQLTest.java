@@ -1,13 +1,10 @@
 package domen.infrastructure.database;
 
-import domen.domain.TaskRepository;
-import domen.domain.TaskService;
 import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -16,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,23 +22,13 @@ import static org.mockito.Mockito.*;
 class TaskRepositorySQLTest {
 
     @Mock
-    Connection mockConnection;
+    private Connection mockConnection;
     @Mock
-    PreparedStatement mockPreparedStatement;
-    @InjectMocks
-    private TaskService taskService;
+    private PreparedStatement mockPreparedStatement;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
-    }
-
-    @Test
-    void shouldSaveTaskToDatabase() {
-        TaskRepositorySQL database = new TaskRepositorySQL();
-        Task task = taskService.create("Title", "Description");
-        database.save(task);
     }
 
     @Test
@@ -66,7 +52,6 @@ class TaskRepositorySQLTest {
 
         // then
         ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<Object> paramCaptor = ArgumentCaptor.forClass(Object.class);
 
         verify(mockConnection).prepareStatement(sqlCaptor.capture());
         verify(mockPreparedStatement).executeUpdate();
@@ -74,14 +59,11 @@ class TaskRepositorySQLTest {
         assertEquals("INSERT INTO task (id, title, description, status, start_date_time, finish_date_time)" +
                 " VALUES (?::uuid,?,?,?::task_status,?::timestamp,?::timestamp)", sqlCaptor.getValue());
 
-        List<Object> params = paramCaptor.getAllValues();
-
-        verify(mockPreparedStatement).setObject(eq(1), any());
+        verify(mockPreparedStatement).setObject(eq(1), any(UUID.class));
         verify(mockPreparedStatement).setString(eq(2), eq(task.title()));
         verify(mockPreparedStatement).setString(eq(3), eq(task.description()));
         verify(mockPreparedStatement).setString(eq(4), eq(task.status().toString()));
         verify(mockPreparedStatement).setTimestamp(eq(5), eq(Timestamp.valueOf(task.startDateTime())));
         verify(mockPreparedStatement).setTimestamp(eq(6), eq(Timestamp.valueOf(task.finishDateTime())));
-
     }
 }

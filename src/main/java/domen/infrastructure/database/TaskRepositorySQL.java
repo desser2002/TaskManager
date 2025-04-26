@@ -4,27 +4,23 @@ import domen.domain.TaskRepository;
 import domen.domain.model.Task;
 
 import java.sql.*;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public class TaskRepositorySQL implements TaskRepository {
-
     private static final String SAVE_STATEMENT = "INSERT INTO task (id, title, description, status, start_date_time, finish_date_time)" +
             " VALUES (?::uuid,?,?,?::task_status,?::timestamp,?::timestamp)";
 
     private final Connection externalConnection;
 
     public TaskRepositorySQL() {
-        this.externalConnection = null; // обычный конструктор
+        this.externalConnection = null;
     }
 
     public TaskRepositorySQL(Connection connection) {
-        this.externalConnection = connection; // конструктор для тестов
+        this.externalConnection = connection;
     }
-
-
     @Override
     public void save(Task task) {
 
@@ -45,9 +41,7 @@ public class TaskRepositorySQL implements TaskRepository {
     }
 
     @Override
-    public void update(Task updatedTask) {
-
-    }
+    public void update(Task updatedTask) {}
 
     @Override
     public List<Task> getAll() {

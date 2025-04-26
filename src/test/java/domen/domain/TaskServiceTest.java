@@ -4,7 +4,6 @@ import domen.domain.exception.TaskNotFoundException;
 import domen.domain.model.Subtask;
 import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -18,7 +17,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
 
 class TaskServiceTest {
     @Mock
@@ -221,7 +219,6 @@ class TaskServiceTest {
         assertTrue(activeTasks.contains(task2));
         assertFalse(activeTasks.contains(task3));
         assertTrue(activeTasks.contains(task4));
-
     }
 
     @Test
@@ -243,7 +240,6 @@ class TaskServiceTest {
         assertFalse(completedTasks.contains(task2));
         assertTrue(completedTasks.contains(task3));
         assertFalse(completedTasks.contains(task4));
-
     }
 
     @Test
@@ -265,7 +261,6 @@ class TaskServiceTest {
         assertFalse(overdueTasks.contains(task2));
         assertFalse(overdueTasks.contains(task3));
         assertTrue(overdueTasks.contains(task4));
-
     }
 
     @Test
@@ -298,18 +293,15 @@ class TaskServiceTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> taskService.createSubtask(taskId, null, "Subtask desc"));
 
         assertEquals("Title cannot be null or empty", ex.getMessage());
-
     }
 
     @Test
     public void shouldThrowExceptionWhenTaskNotFound() {
         //given
         String taskId = "1";
-        Task task = new Task(taskId, "Title", "Desc", TaskStatus.NEW, null, null, new LinkedHashSet<>());
         when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
         //when then
         TaskNotFoundException ex = assertThrows(TaskNotFoundException.class, () -> taskService.createSubtask(taskId, "Subtask title", "Subtask desc"));
         assertEquals("Task with id " + taskId + " not found", ex.getMessage());
     }
-
 }
