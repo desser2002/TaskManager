@@ -11,7 +11,6 @@ import java.util.UUID;
 public class TaskRepositorySQL implements TaskRepository {
     private static final String SAVE_STATEMENT = "INSERT INTO task (id, title, description, status, start_date_time, finish_date_time)" +
             " VALUES (?::uuid,?,?,?::task_status,?::timestamp,?::timestamp)";
-
     private final Connection externalConnection;
 
     public TaskRepositorySQL() {
@@ -21,18 +20,15 @@ public class TaskRepositorySQL implements TaskRepository {
     public TaskRepositorySQL(Connection connection) {
         this.externalConnection = connection;
     }
+
     @Override
     public void save(Task task) {
-
         try (Connection connection = getConnection();
              PreparedStatement ps = prepareSaveTaskStatement(task, connection)) {
-
             ps.executeUpdate();
-
         } catch (SQLException e) {
             throw new RuntimeException("Error during writing task info to database", e);
         }
-
     }
 
     @Override
@@ -41,7 +37,8 @@ public class TaskRepositorySQL implements TaskRepository {
     }
 
     @Override
-    public void update(Task updatedTask) {}
+    public void update(Task updatedTask) {
+    }
 
     @Override
     public List<Task> getAll() {
@@ -50,7 +47,7 @@ public class TaskRepositorySQL implements TaskRepository {
 
     private Connection getConnection() throws SQLException {
         if (externalConnection != null) {
-            return externalConnection; // тестовый мок
+            return externalConnection;
         }
         return DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/TaskManager",
@@ -71,13 +68,11 @@ public class TaskRepositorySQL implements TaskRepository {
         } else {
             ps.setNull(5, java.sql.Types.TIMESTAMP);
         }
-
         if (task.finishDateTime() != null) {
             ps.setTimestamp(6, Timestamp.valueOf(task.finishDateTime()));
         } else {
             ps.setNull(6, java.sql.Types.TIMESTAMP);
         }
-
         return ps;
     }
 }
