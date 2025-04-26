@@ -10,8 +10,20 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class TaskRepositorySQL implements TaskRepository {
+
     private static final String SAVE_STATEMENT = "INSERT INTO task (id, title, description, status, start_date_time, finish_date_time)" +
             " VALUES (?::uuid,?,?,?::task_status,?::timestamp,?::timestamp)";
+
+    private final Connection externalConnection;
+
+    public TaskRepositorySQL() {
+        this.externalConnection = null; // обычный конструктор
+    }
+
+    public TaskRepositorySQL(Connection connection) {
+        this.externalConnection = connection; // конструктор для тестов
+    }
+
 
     @Override
     public void save(Task task) {
@@ -42,14 +54,16 @@ public class TaskRepositorySQL implements TaskRepository {
         return List.of();
     }
 
-    private static Connection getConnection() throws SQLException {
+    private Connection getConnection() throws SQLException {
+        if (externalConnection != null) {
+            return externalConnection; // тестовый мок
+        }
         return DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/TaskManager",
                 "admin",
                 "admin"
         );
     }
-
 
     private PreparedStatement prepareSaveTaskStatement(Task task, Connection connection) throws SQLException {
         PreparedStatement ps = connection.prepareStatement(SAVE_STATEMENT);

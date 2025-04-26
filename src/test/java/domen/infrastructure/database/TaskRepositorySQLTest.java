@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -23,8 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class TaskRepositorySQLTest {
-    @Mock
-    private TaskRepository taskRepository;
+
     @Mock
     Connection mockConnection;
     @Mock
@@ -35,6 +35,7 @@ class TaskRepositorySQLTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
     }
 
     @Test
@@ -58,16 +59,16 @@ class TaskRepositorySQLTest {
         );
         when(mockConnection.prepareStatement(any(String.class))).thenReturn(mockPreparedStatement);
         when(mockPreparedStatement.executeUpdate()).thenReturn(1);
+        TaskRepositorySQL database = new TaskRepositorySQL(mockConnection);
 
         //when
-        taskRepository.save(task);
+        database.save(task);
 
         // then
         ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Object> paramCaptor = ArgumentCaptor.forClass(Object.class);
 
         verify(mockConnection).prepareStatement(sqlCaptor.capture());
-        verify(mockPreparedStatement, times(6)).setObject(anyInt(), paramCaptor.capture());
         verify(mockPreparedStatement).executeUpdate();
 
         assertEquals("INSERT INTO task (id, title, description, status, start_date_time, finish_date_time)" +
@@ -75,13 +76,14 @@ class TaskRepositorySQLTest {
 
         List<Object> params = paramCaptor.getAllValues();
 
+        verify(mockPreparedStatement).setObject(eq(1), any());
+        verify(mockPreparedStatement).setString(eq(2), eq(task.title()));
+        verify(mockPreparedStatement).setString(eq(3), eq(task.description()));
+        verify(mockPreparedStatement).setString(eq(4), eq(task.status().toString()));
+        verify(mockPreparedStatement).setTimestamp(eq(5), eq(Timestamp.valueOf(task.startDateTime())));
+        verify(mockPreparedStatement).setTimestamp(eq(6), eq(Timestamp.valueOf(task.finishDateTime())));
 
-        assertEquals(UUID.fromString(task.id()), params.get(0));
-        assertEquals(task.title(), params.get(1));
-        assertEquals(task.description(), params.get(2));
-        assertEquals(task.status(), params.get(3));
-        assertEquals(task.startDateTime(), params.get(4));
-        assertEquals(task.finishDateTime(), params.get(5));
+
 
 
     }
