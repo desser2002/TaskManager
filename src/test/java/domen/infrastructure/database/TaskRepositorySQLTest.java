@@ -83,8 +83,5 @@ class TaskRepositorySQLTest {
         verify(mockPreparedStatement).setTimestamp(eq(5), eq(Timestamp.valueOf(task.startDateTime())));
         verify(mockPreparedStatement).setTimestamp(eq(6), eq(Timestamp.valueOf(task.finishDateTime())));
 
-
-
-
     }
 }
