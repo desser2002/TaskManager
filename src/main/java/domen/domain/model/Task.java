@@ -1,13 +1,10 @@
 package domen.domain.model;
-
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 public record Task(String id, String title, String description, TaskStatus status, LocalDateTime startDateTime,
                    LocalDateTime finishDateTime, LinkedHashSet<Subtask> subtasks) {
-
-
     public Task copyWithUpdate(String newTitle, String newDescription, TaskStatus newStatus) {
         return new Task(
                 this.id,
@@ -17,8 +14,6 @@ public record Task(String id, String title, String description, TaskStatus statu
                 this.startDateTime,
                 this.finishDateTime,
                 this.subtasks);
-
-
     }
 
     public Task copyWithUpdate(LocalDateTime newStartDateTime, LocalDateTime newFinishDateTime) {
@@ -60,7 +55,6 @@ public record Task(String id, String title, String description, TaskStatus statu
         LinkedHashSet<Subtask> updatedSubtasks = new LinkedHashSet<>(this.subtasks);
         updatedSubtasks.add(subtask);
         return copyWithUpdate(updatedSubtasks);
-
     }
 
     public Task updateSubtask(Subtask updatedSubtask) {
@@ -69,5 +63,4 @@ public record Task(String id, String title, String description, TaskStatus statu
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         return copyWithUpdate(updatedSubtasks);
     }
-
 }
