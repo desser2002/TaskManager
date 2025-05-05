@@ -67,11 +67,9 @@ public class TaskRepositorySQL implements TaskRepository {
                 PreparedStatement ps = connection.prepareStatement(SELECT_ALL_STATEMENT);
                 ResultSet rs = ps.executeQuery()
         ) {
-            {
-                while (rs.next()) {
-                    Task task = mapRowToTask(rs);
-                    tasks.add(task);
-                }
+            while (rs.next()) {
+                Task task = mapRowToTask(rs);
+                tasks.add(task);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

@@ -1,5 +1,4 @@
 package domen.infrastructure.database;
-import domen.domain.TaskRepository;
 import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,28 +62,39 @@ class TaskRepositorySQLTest {
     @Test
     void shouldReturnTaskWhenFoundById() throws SQLException {
         // given
-        String taskId = UUID.randomUUID().toString();
+        Task task = new Task(
+                UUID.randomUUID().toString(),
+                "Test Title",
+                "Test Description",
+                TaskStatus.NEW,
+                LocalDateTime.of(2024, 4, 26, 12, 0),
+                LocalDateTime.of(2024, 4, 26, 14, 0),
+                new LinkedHashSet<>()
+        );
         Connection connection = mock(Connection.class);
         PreparedStatement ps = mock(PreparedStatement.class);
         ResultSet rs = mock(ResultSet.class);
         when(connection.prepareStatement(any(String.class))).thenReturn(ps);
         when(ps.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(true);
-        when(rs.getObject("id", UUID.class)).thenReturn(UUID.fromString(taskId));
-        when(rs.getString("title")).thenReturn("Test Title");
-        when(rs.getString("description")).thenReturn("Test Description");
-        when(rs.getString("status")).thenReturn("NEW");
-        when(rs.getTimestamp("start_date_time")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2024, 4, 26, 12, 0)));
-        when(rs.getTimestamp("finish_date_time")).thenReturn(Timestamp.valueOf(LocalDateTime.of(2024, 4, 26, 14, 0)));
+        when(rs.getObject("id", UUID.class)).thenReturn(UUID.fromString(task.id()));
+        when(rs.getString("title")).thenReturn(task.title());
+        when(rs.getString("description")).thenReturn(task.description());
+        when(rs.getString("status")).thenReturn(task.status().toString());
+        when(rs.getTimestamp("start_date_time")).thenReturn(Timestamp.valueOf(task.startDateTime()));
+        when(rs.getTimestamp("finish_date_time")).thenReturn(Timestamp.valueOf(task.finishDateTime()));
         TaskRepositorySQL database = new TaskRepositorySQL(connection);
         //when
-        Optional<Task> result = database.findById(taskId);
+        Optional<Task> result = database.findById(task.id());
         //then
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(connection).prepareStatement(sqlCaptor.capture());
+        assertEquals("SELECT id,title,description,status,start_date_time,finish_date_time FROM task WHERE id = ?::uuid", sqlCaptor.getValue());
         assertTrue(result.isPresent());
-        Task task = result.get();
-        assertEquals("Test Title", task.title());
-        assertEquals("Test Description", task.description());
-        assertEquals(TaskStatus.NEW, task.status());
+        Task taskFromDatabase = result.get();
+        assertEquals(task.title(), taskFromDatabase.title());
+        assertEquals(task.description(), taskFromDatabase.description());
+        assertEquals(task.status(), taskFromDatabase.status());
     }
 
     @Test
@@ -116,6 +126,4 @@ class TaskRepositorySQLTest {
         verify(mockPreparedStatement).setObject(eq(6), eq(UUID.fromString(task.id())));
         verify(mockPreparedStatement).executeUpdate();
     }
-
-
 }
