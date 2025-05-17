@@ -1,6 +1,7 @@
 package domen.domain.model;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public record Task(String id, String title, String description, TaskStatus status, LocalDateTime startDateTime,
@@ -62,5 +63,9 @@ public record Task(String id, String title, String description, TaskStatus statu
                 .map(s -> s.id().equals(updatedSubtask.id()) ? updatedSubtask : s)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         return copyWithUpdate(updatedSubtasks);
+    }
+
+    public boolean areAllSubtaskDone(){
+        return subtasks.stream().allMatch(s->s.status().equals(TaskStatus.DONE));
     }
 }

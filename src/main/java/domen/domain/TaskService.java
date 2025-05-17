@@ -1,5 +1,4 @@
 package domen.domain;
-
 import domen.domain.exception.TaskNotFoundException;
 import domen.domain.model.Subtask;
 import domen.domain.model.Task;
@@ -32,7 +31,6 @@ public class TaskService {
     private Task buildAndSaveTask(String title, String description, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
         if (title == null || title.isBlank())
             throw new IllegalArgumentException("Title cannot be null or empty");
-
         LinkedHashSet<Subtask> subtasks = new LinkedHashSet<>();
         Task task = new Task(UUID.randomUUID().toString(),
                 title,
@@ -47,23 +45,26 @@ public class TaskService {
     }
 
     public Task update(String id, String newTitle, String newDescription, TaskStatus newStatus) {
-        Task updatedTask = getTask(id).copyWithUpdate(newTitle, newDescription, newStatus);
-
+        Task task = getTask(id);
+        if (newStatus == TaskStatus.DONE && !task.areAllSubtaskDone())
+        {
+            throw new IllegalStateException("Cannot mark task as DONE when not all subtasks are DONE");
+        }
+        Task updatedTask = task.copyWithUpdate(newTitle, newDescription, newStatus);
         taskRepository.update(updatedTask);
         return updatedTask;
     }
 
-    public Task update(String id, Subtask updatedSubtask) {
-        Task task = getTask(id);
-        Task updateTask = task.updateSubtask(updatedSubtask);
-        taskRepository.update(updateTask);
-        return updateTask;
+    public Task update(String taskId, LinkedHashSet<Subtask> subtasks) {
+        Task task = getTask(taskId);
+        Task updatedTask = task.copyWithUpdate(subtasks);
+        taskRepository.update(updatedTask);
+        return updatedTask;
     }
 
     public Task assignTime(String id, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
         validateTaskDateTime(startDateTime, finishDateTime);
         Task updatedTask = getTask(id).copyWithUpdate(startDateTime, finishDateTime);
-
         taskRepository.update(updatedTask);
         return updatedTask;
     }
@@ -72,7 +73,6 @@ public class TaskService {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("ID cannot be null or empty");
         }
-
         return taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task with id " + id + " not found"));
     }
@@ -121,9 +121,15 @@ public class TaskService {
         taskRepository.update(updatedtask);
         return updatedtask;
     }
+    public Task updateSubtask(Task task, Subtask subtask) {
+        Task updatedtask = task.updateSubtask(subtask);
+        taskRepository.update(updatedtask);
+        return updatedtask;
+    }
 
     public LinkedHashSet<Subtask> getSubtasks(String taskId) {
         return getTask(taskId).subtasks();
     }
+
 
 }

@@ -1,4 +1,5 @@
 package domen.infrastructure.database;
+import domen.domain.SubtaskRepository;
 import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,8 @@ class TaskRepositorySQLTest {
     private Connection mockConnection;
     @Mock
     private PreparedStatement mockPreparedStatement;
+    @Mock
+    private SubtaskRepository subtaskRepository;
 
     @BeforeEach
     void setUp() {
@@ -42,7 +45,7 @@ class TaskRepositorySQLTest {
         );
         when(mockConnection.prepareStatement(any(String.class))).thenReturn(mockPreparedStatement);
         when(mockPreparedStatement.executeUpdate()).thenReturn(1);
-        TaskRepositorySQL database = new TaskRepositorySQL(mockConnection);
+        TaskRepositorySQL database = new TaskRepositorySQL(mockConnection,subtaskRepository);
         //when
         database.save(task);
         // then
@@ -83,7 +86,7 @@ class TaskRepositorySQLTest {
         when(rs.getString("status")).thenReturn(task.status().toString());
         when(rs.getTimestamp("start_date_time")).thenReturn(Timestamp.valueOf(task.startDateTime()));
         when(rs.getTimestamp("finish_date_time")).thenReturn(Timestamp.valueOf(task.finishDateTime()));
-        TaskRepositorySQL database = new TaskRepositorySQL(connection);
+        TaskRepositorySQL database = new TaskRepositorySQL(connection,subtaskRepository);
         //when
         Optional<Task> result = database.findById(task.id());
         //then
@@ -111,7 +114,7 @@ class TaskRepositorySQLTest {
         );
         when(mockConnection.prepareStatement(any(String.class))).thenReturn(mockPreparedStatement);
         when(mockPreparedStatement.executeUpdate()).thenReturn(1);
-        TaskRepositorySQL database = new TaskRepositorySQL(mockConnection);
+        TaskRepositorySQL database = new TaskRepositorySQL(mockConnection,subtaskRepository);
         //when
         database.update(task);
         //then

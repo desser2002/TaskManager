@@ -1,5 +1,7 @@
 package domen.infrastructure.database;
+import domen.domain.SubtaskRepository;
 import domen.domain.TaskRepository;
+import domen.domain.model.Subtask;
 import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 
@@ -11,21 +13,24 @@ public class TaskRepositorySQL implements TaskRepository {
             " VALUES (?::uuid,?,?,?::task_status,?::timestamp,?::timestamp)";
     private static final String SELECT_BY_ID_STATEMENT = "SELECT id,title,description,status,start_date_time,finish_date_time FROM task WHERE id = ?::uuid";
     private static final String UPDATE_STATEMENT = "UPDATE task SET title=?, description=?, status=?, start_date_time=?,finish_date_time=? WHERE id=?";
-    private final Connection externalConnection;
     private static final String SELECT_ALL_STATEMENT = "SELECT id,title,description,status,start_date_time,finish_date_time FROM task";
+    private final Connection externalConnection;
+    private SubtaskRepository subtaskRepository;
 
     public TaskRepositorySQL() {
         this.externalConnection = null;
+        this.subtaskRepository = new SubtaskRepositorySQL();
     }
 
-    public TaskRepositorySQL(Connection connection) {
+    public TaskRepositorySQL(Connection connection, SubtaskRepository subtaskRepository) {
         this.externalConnection = connection;
+        this.subtaskRepository = subtaskRepository;
     }
 
     @Override
     public void save(Task task) {
         try (Connection connection = getConnection();
-             PreparedStatement ps = prepareStatementForSaveOrUpdate(task, connection, SAVE_STATEMENT, true)) {
+             PreparedStatement ps = prepareStatementForSaveOrUpdate(task, SAVE_STATEMENT, true)) {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error during saving task to database", e);
@@ -34,9 +39,11 @@ public class TaskRepositorySQL implements TaskRepository {
 
     @Override
     public void update(Task task) {
-        try (Connection connection = getConnection();
-             PreparedStatement ps = prepareStatementForSaveOrUpdate(task, connection, UPDATE_STATEMENT, false)) {
-            ps.executeUpdate();
+        try (Connection connection = getConnection()) {
+            try (PreparedStatement ps = prepareStatementForSaveOrUpdate(task, UPDATE_STATEMENT, false)) {
+                ps.executeUpdate();
+            }
+            subtaskRepository.syncSubtasks(task, connection);
         } catch (SQLException e) {
             throw new RuntimeException("Error during updating task in database", e);
         }
@@ -49,7 +56,7 @@ public class TaskRepositorySQL implements TaskRepository {
             ps.setObject(1, UUID.fromString(id));
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Task task = mapRowToTask(rs);
+                    Task task = mapRowToTaskWithSubtasks(rs);
                     return Optional.of(task);
                 }
             }
@@ -68,8 +75,8 @@ public class TaskRepositorySQL implements TaskRepository {
                 ResultSet rs = ps.executeQuery()
         ) {
             while (rs.next()) {
-                Task task = mapRowToTask(rs);
-                tasks.add(task);
+                Task taskWithSubtasks = mapRowToTaskWithSubtasks(rs);
+                tasks.add(taskWithSubtasks);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -104,8 +111,8 @@ public class TaskRepositorySQL implements TaskRepository {
         }
     }
 
-    private PreparedStatement prepareStatementForSaveOrUpdate(Task task, Connection connection, String sql, boolean idFirst) throws SQLException {
-        PreparedStatement ps = connection.prepareStatement(sql);
+    private PreparedStatement prepareStatementForSaveOrUpdate(Task task, String sql, boolean idFirst) throws SQLException {
+        PreparedStatement ps = getConnection().prepareStatement(sql);
         if (idFirst) {
             ps.setObject(1, UUID.fromString(task.id()));
             bindTaskFields(ps, task, 2);
@@ -114,6 +121,11 @@ public class TaskRepositorySQL implements TaskRepository {
             ps.setObject(6, UUID.fromString(task.id()));
         }
         return ps;
+    }
+
+    private Task mapRowToTaskWithSubtasks(ResultSet rs) throws SQLException {
+        Task task = mapRowToTask(rs);
+        return task.copyWithUpdate((LinkedHashSet<Subtask>) subtaskRepository.getSubtasksByTaskId(task.id(), getConnection()));
     }
 
     private Task mapRowToTask(ResultSet rs) throws SQLException {
@@ -128,3 +140,9 @@ public class TaskRepositorySQL implements TaskRepository {
         );
     }
 }
+
+
+
+
+
+
