@@ -1,7 +1,7 @@
 package domen.infrastructure.database;
+
 import domen.domain.SubtaskRepository;
 import domen.domain.model.Subtask;
-import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 
 import java.sql.Connection;
@@ -11,10 +11,15 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class SubtaskRepositorySQL implements SubtaskRepository {
-    private static final String UPDATE_SUBTASK_STATEMENT = "UPDATE subtask SET title = ?, description = ?, status = ? WHERE id = ?";
-    private static final String SAVE_SUBTASK_STATEMENT = "INSERT INTO subtask (id, title, description, status,task_id) VALUES (?::uuid,?, ?, ?::task_status,?::uuid)";
-    private static final String DELETE_SUBTASK_STATEMENT = "DELETE FROM subtask WHERE id = ?";
-    private static final String SELECT_SUBTASKS_BY_TASK_ID_STATEMENT = "SELECT id, title, description, status FROM subtask WHERE task_id = ?::uuid";
+    private static final String UPDATE_SUBTASK_STATEMENT =
+            "UPDATE subtask SET title = ?, description = ?, status = ? WHERE id = ?";
+    private static final String SAVE_SUBTASK_STATEMENT =
+            "INSERT INTO subtask (id, title, description, status,task_id) " +
+                    "VALUES (?::uuid,?, ?, ?::task_status,?::uuid)";
+    private static final String DELETE_SUBTASK_STATEMENT =
+            "DELETE FROM subtask WHERE id = ?";
+    private static final String SELECT_SUBTASKS_BY_TASK_ID_STATEMENT =
+            "SELECT id, title, description, status FROM subtask WHERE task_id = ?::uuid";
 
     @Override
     public void update(Subtask subtask, Connection connection) {
@@ -69,36 +74,13 @@ public class SubtaskRepositorySQL implements SubtaskRepository {
         return subtasks;
     }
 
-     private Subtask mapRowToSubtask(ResultSet rs) throws SQLException {
+    private Subtask mapRowToSubtask(ResultSet rs) throws SQLException {
         return new Subtask(
                 rs.getObject("id", UUID.class).toString(),
                 rs.getString("title"),
                 rs.getString("description"),
                 TaskStatus.valueOf(rs.getString("status"))
         );
-    }
-
-    @Override
-    public void syncSubtasks(Task task, Connection connection) {
-        Set<Subtask> existingSubtasks = getSubtasksByTaskId(task.id(), connection);
-        Map<String, Subtask> existingSubtasksMap = new HashMap<>();
-        for (Subtask subtask : existingSubtasks) {
-            existingSubtasksMap.put(subtask.id(), subtask);
-        }
-        Set<String> incomingIds = new HashSet<>();
-        for (Subtask subtask : task.subtasks()) {
-            incomingIds.add(subtask.id());
-            if (existingSubtasksMap.containsKey(subtask.id())) {
-                update(subtask, connection);
-            } else {
-                save(subtask, task.id(), connection);
-            }
-        }
-        for (Subtask oldSubtask : existingSubtasks) {
-            if (!incomingIds.contains(oldSubtask.id())) {
-                delete(oldSubtask, connection);
-            }
-        }
     }
 }
 

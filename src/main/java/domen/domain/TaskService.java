@@ -1,11 +1,12 @@
 package domen.domain;
+
 import domen.domain.exception.TaskNotFoundException;
 import domen.domain.model.Subtask;
 import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 
+import java.sql.Connection;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
@@ -14,23 +15,63 @@ import java.util.stream.Collectors;
 
 public class TaskService {
     private final TaskRepository taskRepository;
+    private final SubtaskService subtaskService;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, SubtaskService subtaskService) {
         this.taskRepository = taskRepository;
+        this.subtaskService = subtaskService;
     }
 
-    public Task create(String title, String description) {
-        return buildAndSaveTask(title, description, null, null);
+    public Task create(String title, String description, Connection connection) {
+        return buildAndSaveTask(title, description, null, null, connection);
     }
 
-    public Task create(String title, String description, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
+    public Task create(String title, String description, LocalDateTime startDateTime, LocalDateTime finishDateTime, Connection connection) {
         validateTaskDateTime(startDateTime, finishDateTime);
-        return buildAndSaveTask(title, description, startDateTime, finishDateTime);
+        return buildAndSaveTask(title, description, startDateTime, finishDateTime, connection);
     }
 
-    private Task buildAndSaveTask(String title, String description, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
-        if (title == null || title.isBlank())
+    public Task update(String id, String newTitle, String newDescription, TaskStatus newStatus, Connection connection) {
+        Task task = getTask(id, connection);
+        if (newStatus == TaskStatus.DONE && !subtaskService.areAllSubtasksDone(task.id(), connection)) {
+            throw new IllegalStateException("Cannot mark task as DONE when not all subtasks are DONE");
+        }
+        Task updatedTask = task.copyWithUpdate(newTitle, newDescription, newStatus);
+        taskRepository.update(updatedTask, connection);
+        subtaskService.syncSubtasks(updatedTask.id(), updatedTask.subtasks(), connection);
+        return updatedTask;
+    }
+
+    public Task assignTime(String id, LocalDateTime startDateTime, LocalDateTime finishDateTime, Connection connection) {
+        validateTaskDateTime(startDateTime, finishDateTime);
+        Task updatedTask = getTask(id, connection).copyWithUpdate(startDateTime, finishDateTime);
+        taskRepository.update(updatedTask, connection);
+        return updatedTask;
+    }
+
+    public List<Task> getAllTasks(Connection connection) {
+        return taskRepository.getAll(connection);
+    }
+
+    public List<Task> getCompletedTasks(Connection connection) {
+        return filterTasks(Task::isCompleted, connection);
+    }
+
+    public List<Task> getOverdueTasks(Connection connection) {
+        return filterTasks(Task::isOverdue, connection);
+    }
+
+    private List<Task> filterTasks(Predicate<Task> predicate, Connection connection) {
+        return taskRepository.getAll(connection).stream()
+                .filter(predicate)
+                .collect(Collectors.toList());
+    }
+
+    private Task buildAndSaveTask(String title, String description,
+                                  LocalDateTime startDateTime, LocalDateTime finishDateTime, Connection connection) {
+        if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Title cannot be null or empty");
+        }
         LinkedHashSet<Subtask> subtasks = new LinkedHashSet<>();
         Task task = new Task(UUID.randomUUID().toString(),
                 title,
@@ -40,96 +81,27 @@ public class TaskService {
                 finishDateTime,
                 subtasks
         );
-        taskRepository.save(task);
+        taskRepository.save(task, connection);
         return task;
     }
 
-    public Task update(String id, String newTitle, String newDescription, TaskStatus newStatus) {
-        Task task = getTask(id);
-        if (newStatus == TaskStatus.DONE && !task.areAllSubtaskDone())
-        {
-            throw new IllegalStateException("Cannot mark task as DONE when not all subtasks are DONE");
-        }
-        Task updatedTask = task.copyWithUpdate(newTitle, newDescription, newStatus);
-        taskRepository.update(updatedTask);
-        return updatedTask;
-    }
-
-    public Task update(String taskId, LinkedHashSet<Subtask> subtasks) {
-        Task task = getTask(taskId);
-        Task updatedTask = task.copyWithUpdate(subtasks);
-        taskRepository.update(updatedTask);
-        return updatedTask;
-    }
-
-    public Task assignTime(String id, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
-        validateTaskDateTime(startDateTime, finishDateTime);
-        Task updatedTask = getTask(id).copyWithUpdate(startDateTime, finishDateTime);
-        taskRepository.update(updatedTask);
-        return updatedTask;
-    }
-
-    private Task getTask(String id) {
+    private Task getTask(String id, Connection connection) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("ID cannot be null or empty");
         }
-        return taskRepository.findById(id)
+        return taskRepository.findById(id, connection)
                 .orElseThrow(() -> new TaskNotFoundException("Task with id " + id + " not found"));
     }
 
     private static void validateTaskDateTime(LocalDateTime startDateTime, LocalDateTime finishDateTime) {
-        if (finishDateTime == null) return;
-        if (startDateTime != null && startDateTime.isAfter(finishDateTime))
+        if (finishDateTime == null) {
+            return;
+        }
+        if (startDateTime != null && startDateTime.isAfter(finishDateTime)) {
             throw new IllegalArgumentException("Start date cannot be after finish time");
-        if (finishDateTime.isBefore(LocalDateTime.now()))
+        }
+        if (finishDateTime.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Finish date cannot be before current time");
+        }
     }
-
-    public List<Task> getAllTasks() {
-        return taskRepository.getAll();
-    }
-
-    public List<Task> getActiveTasks() {
-        return filterTasks(Task::isActive);
-    }
-
-    public List<Task> getCompletedTasks() {
-        return filterTasks(Task::isCompleted);
-    }
-
-    public List<Task> getOverdueTasks() {
-        return filterTasks(Task::isOverdue);
-    }
-
-    private List<Task> filterTasks(Predicate<Task> predicate) {
-        return taskRepository.getAll().stream()
-                .filter(predicate)
-                .collect(Collectors.toList());
-    }
-
-    public Task createSubtask(String taskId, String title, String description) {
-        if (title == null || title.isBlank())
-            throw new IllegalArgumentException("Title cannot be null or empty");
-        Subtask subtask = new Subtask(UUID.randomUUID().toString(), title, description, TaskStatus.NEW);
-        Task task = addSubtask(taskId, subtask);
-        return task;
-    }
-
-    private Task addSubtask(String taskId, Subtask subtask) {
-        Task task = getTask(taskId);
-        Task updatedtask = task.addSubtask(subtask);
-        taskRepository.update(updatedtask);
-        return updatedtask;
-    }
-    public Task updateSubtask(Task task, Subtask subtask) {
-        Task updatedtask = task.updateSubtask(subtask);
-        taskRepository.update(updatedtask);
-        return updatedtask;
-    }
-
-    public LinkedHashSet<Subtask> getSubtasks(String taskId) {
-        return getTask(taskId).subtasks();
-    }
-
-
 }
