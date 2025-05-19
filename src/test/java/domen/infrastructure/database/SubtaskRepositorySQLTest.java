@@ -30,7 +30,7 @@ class SubtaskRepositorySQLTest {
     @Test
     void shouldUpdateSubtask() throws SQLException {
         //given
-        SubtaskRepository subtaskRepository = new SubtaskRepositorySQL();
+        SubtaskRepository subtaskRepository = new SubtaskRepositorySQL(mockConnection);
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
         String title = "Title";
         String description = "Description";
@@ -51,7 +51,7 @@ class SubtaskRepositorySQLTest {
 
     @Test
     void shouldSaveSubtask() throws SQLException {
-        SubtaskRepository subtaskRepository = new SubtaskRepositorySQL();
+        SubtaskRepository subtaskRepository = new SubtaskRepositorySQL(mockConnection);
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
         String subtaskId = UUID.randomUUID().toString();
         String title = "Title";
@@ -75,7 +75,7 @@ class SubtaskRepositorySQLTest {
     @Test
     void shouldDeleteSubtask() throws SQLException {
         //given
-        SubtaskRepository subtaskRepository = new SubtaskRepositorySQL();
+        SubtaskRepository subtaskRepository = new SubtaskRepositorySQL(mockConnection);
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
         String subtaskId = UUID.randomUUID().toString();
         String title = "Title";

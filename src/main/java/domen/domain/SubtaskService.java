@@ -7,8 +7,8 @@ import domen.domain.model.TaskStatus;
 import java.util.*;
 
 public class SubtaskService {
-    SubtaskRepository subtaskRepository;
-    TaskRepository taskRepository;
+    private final SubtaskRepository subtaskRepository;
+    private final TaskRepository taskRepository;
 
     public SubtaskService(SubtaskRepository subtaskRepository, TaskRepository taskRepository) {
         this.subtaskRepository = subtaskRepository;
@@ -27,8 +27,9 @@ public class SubtaskService {
                 .orElseThrow(() -> new NoSuchElementException("Subtask not found subtask_id:" + subtaskId));
     }
 
-    void saveSubtask(String taskId, Subtask subtask) {
+    void saveSubtask(String taskId, String title, String description) {
         validateTaskExists(taskId);
+        Subtask subtask = new Subtask(UUID.randomUUID().toString(), title, description, TaskStatus.NEW);
         subtaskRepository.save(subtask, taskId);
     }
 
@@ -41,29 +42,6 @@ public class SubtaskService {
         validateTaskExists(taskId);
         Subtask subtask = getSubtask(taskId, subtaskId);
         subtaskRepository.delete(subtask);
-    }
-
-    void syncSubtasks(String taskId, Set<Subtask> incomingSubtasks) {
-        validateTaskExists(taskId);
-        Set<Subtask> existingSubtasks = subtaskRepository.getSubtasksByTaskId(taskId);
-        Map<String, Subtask> existingSubtaskMap = new HashMap<>();
-        for (Subtask subtask : existingSubtasks) {
-            existingSubtaskMap.put(subtask.id(), subtask);
-        }
-        Set<String> incomingIds = new HashSet<>();
-        for (Subtask subtask : incomingSubtasks) {
-            incomingIds.add(subtask.id());
-            if (existingSubtaskMap.containsKey(subtask.id())) {
-                subtaskRepository.update(subtask);
-            } else {
-                subtaskRepository.save(subtask, taskId);
-            }
-        }
-        for (Subtask oldSubtask : existingSubtasks) {
-            if (!incomingIds.contains(oldSubtask.id())) {
-                subtaskRepository.delete(oldSubtask);
-            }
-        }
     }
 
     boolean areAllSubtasksDone(String taskId) {

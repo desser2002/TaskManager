@@ -6,19 +6,20 @@ import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class TaskService {
     private final TaskRepository taskRepository;
     private final SubtaskService subtaskService;
+    private final SubtaskRepository subtaskRepository;
 
-    public TaskService(TaskRepository taskRepository, SubtaskService subtaskService) {
+    public TaskService(TaskRepository taskRepository,
+                       SubtaskService subtaskService, SubtaskRepository subtaskRepository) {
         this.taskRepository = taskRepository;
         this.subtaskService = subtaskService;
+        this.subtaskRepository = subtaskRepository;
     }
 
     public Task create(String title, String description) {
@@ -30,6 +31,15 @@ public class TaskService {
         return buildAndSaveTask(title, description, startDateTime, finishDateTime);
     }
 
+    public Task update(String id, Set<Subtask> newSubtasks) {
+        Task task = getTask(id);
+        LinkedHashSet<Subtask> subtasks = new LinkedHashSet<>(newSubtasks);
+        Task updatedTask = task.copyWithUpdate(subtasks);
+        taskRepository.update(updatedTask);
+        syncSubtasks(updatedTask.id(), updatedTask.subtasks());
+        return updatedTask;
+    }
+
     public Task update(String id, String newTitle, String newDescription, TaskStatus newStatus) {
         Task task = getTask(id);
         if (newStatus == TaskStatus.DONE && !subtaskService.areAllSubtasksDone(task.id())) {
@@ -37,7 +47,6 @@ public class TaskService {
         }
         Task updatedTask = task.copyWithUpdate(newTitle, newDescription, newStatus);
         taskRepository.update(updatedTask);
-        subtaskService.syncSubtasks(updatedTask.id(), updatedTask.subtasks());
         return updatedTask;
     }
 
@@ -105,6 +114,28 @@ public class TaskService {
         }
         if (finishDateTime.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Finish date cannot be before current time");
+        }
+    }
+
+    private void syncSubtasks(String taskId, Set<Subtask> incomingSubtasks) {
+        Set<Subtask> existingSubtasks = subtaskRepository.getSubtasksByTaskId(taskId);
+        Map<String, Subtask> existingSubtaskMap = new HashMap<>();
+        for (Subtask subtask : existingSubtasks) {
+            existingSubtaskMap.put(subtask.id(), subtask);
+        }
+        Set<String> incomingIds = new HashSet<>();
+        for (Subtask subtask : incomingSubtasks) {
+            incomingIds.add(subtask.id());
+            if (existingSubtaskMap.containsKey(subtask.id())) {
+                subtaskRepository.update(subtask);
+            } else {
+                subtaskRepository.save(subtask, taskId);
+            }
+        }
+        for (Subtask oldSubtask : existingSubtasks) {
+            if (!incomingIds.contains(oldSubtask.id())) {
+                subtaskRepository.delete(oldSubtask);
+            }
         }
     }
 }

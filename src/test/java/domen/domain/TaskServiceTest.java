@@ -19,6 +19,10 @@ import static org.mockito.Mockito.*;
 class TaskServiceTest {
     @Mock
     private TaskRepository taskRepository;
+    @Mock
+    private SubtaskService subtaskService;
+    @Mock
+    private SubtaskRepository subtaskRepository;
     @InjectMocks
     private TaskService taskService;
 
@@ -66,11 +70,9 @@ class TaskServiceTest {
     void shouldNotAllowToMarkTaskAsDoneIfNotAllSubtasksDone() {
         //given
         String taskId = UUID.randomUUID().toString();
-        Subtask subtask1 = new Subtask(UUID.randomUUID().toString(), "Sub1", "Desc", TaskStatus.DONE);
-        Subtask subtask2 = new Subtask(UUID.randomUUID().toString(), "Sub1", "Desc", TaskStatus.IN_PROGRESS);
-        LinkedHashSet<Subtask> subtasks = new LinkedHashSet<>(Set.of(subtask1, subtask2));
-        Task task = new Task(taskId, "Task", "Desc", TaskStatus.IN_PROGRESS, null, null, subtasks);
+        Task task = new Task(taskId, "Task", "Desc", TaskStatus.IN_PROGRESS, null, null, null);
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
+        when(subtaskService.areAllSubtasksDone(taskId)).thenReturn(false);
         //when /then
         IllegalStateException ex = assertThrows(IllegalStateException.class, () -> taskService.update(taskId, "New Title", "New Desc", TaskStatus.DONE));
         assertEquals("Cannot mark task as DONE when not all subtasks are DONE", ex.getMessage());
@@ -249,5 +251,26 @@ class TaskServiceTest {
         assertFalse(overdueTasks.contains(task2));
         assertFalse(overdueTasks.contains(task3));
         assertTrue(overdueTasks.contains(task4));
+    }
+
+    @Test
+    void shouldSyncSubtasksOnUpdate() {
+        //given
+        String taskId = UUID.randomUUID().toString();
+        String subtaskToUpdateId = UUID.randomUUID().toString();
+        Task task = new Task(taskId, "Title", "Desc", TaskStatus.NEW, null, null, null);
+        Subtask old = new Subtask(subtaskToUpdateId, "Old", "Old subtask description", TaskStatus.DONE);
+        Subtask updated = new Subtask(subtaskToUpdateId, "Updated", "Updated subtask description", TaskStatus.IN_PROGRESS);
+        Subtask toSave = new Subtask(UUID.randomUUID().toString(), "Save", "Saved subtask description", TaskStatus.NEW);
+        Set<Subtask> existing = Set.of(old);
+        Set<Subtask> incoming = Set.of(updated, toSave);
+        when(subtaskRepository.getSubtasksByTaskId(taskId)).thenReturn(existing);
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
+        //when
+        taskService.update(taskId, incoming);
+        //then
+        verify(subtaskRepository).update(updated);
+        verify(subtaskRepository).save(toSave, taskId);
+        verify(subtaskRepository, never()).delete(any(Subtask.class));
     }
 }

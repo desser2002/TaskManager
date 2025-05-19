@@ -73,12 +73,13 @@ class SubtaskServiceTest {
     void shouldSaveSubtask() {
         //given
         String taskId = UUID.randomUUID().toString();
-        Subtask subtask = new Subtask(UUID.randomUUID().toString(), "Title", "description", TaskStatus.NEW);
+        String title = "Title";
+        String description = "Description";
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(mock(Task.class)));
         //when
-        subtaskService.saveSubtask(taskId, subtask);
+        subtaskService.saveSubtask(taskId, title, description);
         //then
-        verify(subtaskRepository).save(subtask, taskId);
+        verify(subtaskRepository).save(any(Subtask.class), eq(taskId));
     }
 
     @Test
@@ -105,26 +106,6 @@ class SubtaskServiceTest {
         subtaskService.deleteSubtask(taskId, subtaskId);
         //then
         verify(subtaskRepository).delete(subtask);
-    }
-
-    @Test
-    void shouldSyncSubtasks() {
-        //given
-        String taskId = UUID.randomUUID().toString();
-        String subtaskToUpdateId = UUID.randomUUID().toString();
-        Subtask old = new Subtask(subtaskToUpdateId, "Old", "Old subtask description", TaskStatus.DONE);
-        Subtask updated = new Subtask(subtaskToUpdateId, "Updated", "Updated subtask description", TaskStatus.IN_PROGRESS);
-        Subtask toSave = new Subtask(UUID.randomUUID().toString(), "Save", "Saved subtask description", TaskStatus.NEW);
-        Set<Subtask> existing = Set.of(old);
-        Set<Subtask> incoming = Set.of(updated, toSave);
-        when(taskRepository.findById(taskId)).thenReturn(Optional.of(mock(Task.class)));
-        when(subtaskRepository.getSubtasksByTaskId(taskId)).thenReturn(existing);
-        //when
-        subtaskService.syncSubtasks(taskId, incoming);
-        //then
-        verify(subtaskRepository).update(updated);
-        verify(subtaskRepository).save(toSave, taskId);
-        verify(subtaskRepository, never()).delete(any(Subtask.class));
     }
 
     @Test

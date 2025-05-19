@@ -1,4 +1,5 @@
 package domen.infrastructure.database;
+
 import domen.domain.SubtaskRepository;
 import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
@@ -45,7 +46,7 @@ class TaskRepositorySQLTest {
         );
         when(mockConnection.prepareStatement(any(String.class))).thenReturn(mockPreparedStatement);
         when(mockPreparedStatement.executeUpdate()).thenReturn(1);
-        TaskRepositorySQL database = new TaskRepositorySQL(subtaskRepository,mockConnection);
+        TaskRepositorySQL database = new TaskRepositorySQL(subtaskRepository, mockConnection);
         //when
         database.save(task);
         // then
@@ -86,7 +87,7 @@ class TaskRepositorySQLTest {
         when(rs.getString("status")).thenReturn(task.status().toString());
         when(rs.getTimestamp("start_date_time")).thenReturn(Timestamp.valueOf(task.startDateTime()));
         when(rs.getTimestamp("finish_date_time")).thenReturn(Timestamp.valueOf(task.finishDateTime()));
-        TaskRepositorySQL database = new TaskRepositorySQL(subtaskRepository,mockConnection);
+        TaskRepositorySQL database = new TaskRepositorySQL(subtaskRepository, connection);
         //when
         Optional<Task> result = database.findById(task.id());
         //then
@@ -114,7 +115,7 @@ class TaskRepositorySQLTest {
         );
         when(mockConnection.prepareStatement(any(String.class))).thenReturn(mockPreparedStatement);
         when(mockPreparedStatement.executeUpdate()).thenReturn(1);
-        TaskRepositorySQL database = new TaskRepositorySQL(subtaskRepository,mockConnection);
+        TaskRepositorySQL database = new TaskRepositorySQL(subtaskRepository, mockConnection);
         //when
         database.update(task);
         //then
