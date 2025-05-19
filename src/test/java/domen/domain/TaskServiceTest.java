@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -20,8 +19,6 @@ import static org.mockito.Mockito.*;
 class TaskServiceTest {
     @Mock
     private TaskRepository taskRepository;
-    @Mock
-    private Connection connection;
     @InjectMocks
     private TaskService taskService;
 
