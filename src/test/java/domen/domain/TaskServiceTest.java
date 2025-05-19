@@ -1,4 +1,5 @@
 package domen.domain;
+
 import domen.domain.exception.TaskNotFoundException;
 import domen.domain.model.Subtask;
 import domen.domain.model.Task;
@@ -9,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -18,6 +20,8 @@ import static org.mockito.Mockito.*;
 class TaskServiceTest {
     @Mock
     private TaskRepository taskRepository;
+    @Mock
+    private Connection connection;
     @InjectMocks
     private TaskService taskService;
 
@@ -248,102 +252,5 @@ class TaskServiceTest {
         assertFalse(overdueTasks.contains(task2));
         assertFalse(overdueTasks.contains(task3));
         assertTrue(overdueTasks.contains(task4));
-    }
-
-    @Test
-    void shouldCreateSubtask() {
-        //given
-        String taskId = "1";
-        Task originaltask = new Task(taskId, "Title", "Desc", TaskStatus.NEW, null, null, new LinkedHashSet<>());
-        when(taskRepository.findById(taskId)).thenReturn(Optional.of(originaltask));
-        //when
-        Task updatedTask = taskService.createSubtask(taskId, "Subtask title", "Subtask desc");
-        //then
-        assertNotNull(updatedTask);
-        assertEquals(1, updatedTask.subtasks().size());
-        Subtask subtask = updatedTask.subtasks().getFirst();
-        assertEquals("Subtask title", subtask.title());
-        assertEquals("Subtask desc", subtask.description());
-        assertEquals(TaskStatus.NEW, subtask.status());
-        verify(taskRepository).update(updatedTask);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenSubtaskTitleIsNull() {
-        String taskId = "1";
-        Task task = new Task(taskId, "Task title", "Task desc", TaskStatus.NEW, null, null, new LinkedHashSet<>());
-        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> taskService.createSubtask(taskId, null, "Subtask desc"));
-        assertEquals("Title cannot be null or empty", ex.getMessage());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenTaskNotFound() {
-        //given
-        String taskId = "1";
-        when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
-        //when then
-        TaskNotFoundException ex = assertThrows(TaskNotFoundException.class, () -> taskService.createSubtask(taskId, "Subtask title", "Subtask desc"));
-        assertEquals("Task with id " + taskId + " not found", ex.getMessage());
-    }
-
-    @Test
-    void shouldCreateAndAddSubtaskToTask() {
-        //given
-        String taskId = UUID.randomUUID().toString();
-        Task task = new Task(taskId, "Title", "Desc", TaskStatus.NEW, null, null, new LinkedHashSet<>());
-        String subtaskTitle = "Subtask title";
-        String subtaskDesc = "Subtask desc";
-        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        //when
-        Task updateTask = taskService.createSubtask(taskId, subtaskTitle, subtaskDesc);
-        //then
-        assertEquals(1, updateTask.subtasks().size());
-        Subtask subtask = updateTask.subtasks().getFirst();
-        assertEquals(subtaskTitle, subtask.title());
-        assertEquals(subtaskDesc, subtask.description());
-        assertEquals(TaskStatus.NEW, subtask.status());
-        verify(taskRepository).update(updateTask);
-    }
-
-    @Test
-    void shouldDeleteSubtaskFromTask() {
-        //given
-        String taskId = UUID.randomUUID().toString();
-        Subtask kept = new Subtask(UUID.randomUUID().toString(), "Kept", "Desc", TaskStatus.NEW);
-        Subtask toDelete = new Subtask(UUID.randomUUID().toString(), "ToDelete", "Desc", TaskStatus.NEW);
-        LinkedHashSet<Subtask> initialSubtask = new LinkedHashSet<>(Set.of(kept, toDelete));
-        LinkedHashSet<Subtask> updatedSubtasks = new LinkedHashSet<>(Set.of(kept));
-        Task originalTask = new Task(taskId, "Title", "Desc", TaskStatus.NEW, null, null, initialSubtask);
-        when(taskRepository.findById(taskId)).thenReturn(Optional.of(originalTask));
-        Task updatedTask = new Task(taskId, "Title", "Desc", TaskStatus.NEW, null, null, updatedSubtasks);
-        //when
-        taskService.update(taskId, updatedSubtasks);
-        //then
-        verify(taskRepository).update(eq(updatedTask));
-    }
-
-    @Test
-    void shouldUpdateSubtask() {
-        //given
-        String taskId = UUID.randomUUID().toString();
-        String subtaskId = UUID.randomUUID().toString();
-        Subtask subtask = new Subtask(subtaskId, "TitleSub", "DescSub", TaskStatus.NEW);
-        Task task = new Task(taskId, "Title", "Desc", TaskStatus.NEW, null, null, new LinkedHashSet<>(Set.of(subtask)));
-        String updatedTitle = "Update title";
-        String updatedDesc = "Update desc";
-        TaskStatus updatedStatus = TaskStatus.DONE;
-        Subtask updatedSubtask = new Subtask(subtaskId, updatedTitle, updatedDesc, updatedStatus);
-        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        //when
-        Task updatedTask = taskService.updateSubtask(task, updatedSubtask);
-        //then
-        assertEquals(1, updatedTask.subtasks().size());
-        Subtask resultSubtask = updatedTask.subtasks().iterator().next();
-        assertEquals(subtaskId, resultSubtask.id());
-        assertEquals(updatedTitle, resultSubtask.title());
-        assertEquals(updatedDesc, resultSubtask.description());
-        assertEquals(updatedStatus, resultSubtask.status());
-        verify(taskRepository).update(updatedTask);
     }
 }

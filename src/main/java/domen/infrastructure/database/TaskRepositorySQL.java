@@ -20,14 +20,32 @@ public class TaskRepositorySQL implements TaskRepository {
     private static final String SELECT_ALL_STATEMENT =
             "SELECT id,title,description,status,start_date_time,finish_date_time FROM task";
     private final SubtaskRepository subtaskRepository;
+    private final Connection externalConnection;
 
     public TaskRepositorySQL(SubtaskRepository subtaskRepository) {
         this.subtaskRepository = subtaskRepository;
+        this.externalConnection = null;
+    }
+
+    public TaskRepositorySQL(SubtaskRepository subtaskRepository, Connection connection) {
+        this.subtaskRepository = subtaskRepository;
+        this.externalConnection = connection;
+    }
+
+    private Connection getConnection() throws SQLException {
+        if (externalConnection != null) {
+            return externalConnection;
+        }
+        return DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/TaskManager",
+                "admin",
+                "admin"
+        );
     }
 
     @Override
-    public void save(Task task, Connection connection) {
-        try (PreparedStatement ps = prepareStatementForSaveOrUpdate(task, SAVE_STATEMENT, true, connection)) {
+    public void save(Task task) {
+        try (PreparedStatement ps = prepareStatementForSaveOrUpdate(task, SAVE_STATEMENT, true)) {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error during saving task to database", e);
@@ -35,8 +53,8 @@ public class TaskRepositorySQL implements TaskRepository {
     }
 
     @Override
-    public void update(Task task, Connection connection) {
-        try (PreparedStatement ps = prepareStatementForSaveOrUpdate(task, UPDATE_STATEMENT, false, connection)) {
+    public void update(Task task) {
+        try (PreparedStatement ps = prepareStatementForSaveOrUpdate(task, UPDATE_STATEMENT, false)) {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error updating task", e);
@@ -44,12 +62,13 @@ public class TaskRepositorySQL implements TaskRepository {
     }
 
     @Override
-    public Optional<Task> findById(String id, Connection connection) {
-        try (PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID_STATEMENT)) {
+    public Optional<Task> findById(String id) {
+        try (Connection connection = getConnection();
+             PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID_STATEMENT)) {
             ps.setObject(1, UUID.fromString(id));
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Task task = mapRowToTaskWithSubtasks(rs, connection);
+                    Task task = mapRowToTask(rs);
                     return Optional.of(task);
                 }
             }
@@ -60,14 +79,14 @@ public class TaskRepositorySQL implements TaskRepository {
     }
 
     @Override
-    public List<Task> getAll(Connection connection) {
+    public List<Task> getAll() {
         List<Task> tasks = new ArrayList<>();
-        try (
-                PreparedStatement ps = connection.prepareStatement(SELECT_ALL_STATEMENT);
-                ResultSet rs = ps.executeQuery()
+        try (Connection connection = getConnection();
+             PreparedStatement ps = connection.prepareStatement(SELECT_ALL_STATEMENT);
+             ResultSet rs = ps.executeQuery()
         ) {
             while (rs.next()) {
-                Task taskWithSubtasks = mapRowToTaskWithSubtasks(rs, connection);
+                Task taskWithSubtasks = mapRowToTaskWithSubtasks(rs);
                 tasks.add(taskWithSubtasks);
             }
         } catch (SQLException e) {
@@ -93,7 +112,8 @@ public class TaskRepositorySQL implements TaskRepository {
     }
 
     private PreparedStatement prepareStatementForSaveOrUpdate(
-            Task task, String sql, boolean idFirst, Connection connection) throws SQLException {
+            Task task, String sql, boolean idFirst) throws SQLException {
+        Connection connection = getConnection();
         PreparedStatement ps = connection.prepareStatement(sql);
         if (idFirst) {
             ps.setObject(1, UUID.fromString(task.id()));
@@ -105,10 +125,10 @@ public class TaskRepositorySQL implements TaskRepository {
         return ps;
     }
 
-    private Task mapRowToTaskWithSubtasks(ResultSet rs, Connection connection) throws SQLException {
+    private Task mapRowToTaskWithSubtasks(ResultSet rs) throws SQLException {
         Task task = mapRowToTask(rs);
         return task.copyWithUpdate(
-                (LinkedHashSet<Subtask>) subtaskRepository.getSubtasksByTaskId(task.id(), connection));
+                (LinkedHashSet<Subtask>) subtaskRepository.getSubtasksByTaskId(task.id()));
     }
 
     private Task mapRowToTask(ResultSet rs) throws SQLException {

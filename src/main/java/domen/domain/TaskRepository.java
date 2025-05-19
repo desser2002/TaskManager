@@ -2,16 +2,15 @@ package domen.domain;
 
 import domen.domain.model.Task;
 
-import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 
 public interface TaskRepository {
-    void save(Task task, Connection connection);
+    void save(Task task);
 
-    Optional<Task> findById(String id, Connection connection);
+    Optional<Task> findById(String id);
 
-    void update(Task updatedTask, Connection connection);
+    void update(Task updatedTask);
 
-    List<Task> getAll(Connection connection);
+    List<Task> getAll();
 }

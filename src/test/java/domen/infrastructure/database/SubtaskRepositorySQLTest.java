@@ -1,7 +1,7 @@
 package domen.infrastructure.database;
+
 import domen.domain.SubtaskRepository;
 import domen.domain.model.Subtask;
-import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,9 +11,6 @@ import org.mockito.MockitoAnnotations;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -41,7 +38,7 @@ class SubtaskRepositorySQLTest {
         TaskStatus status = TaskStatus.IN_PROGRESS;
         Subtask subtask = new Subtask(id, title, description, status);
         //when
-        subtaskRepository.update(subtask, mockConnection);
+        subtaskRepository.update(subtask);
         //then
         verify(mockConnection).prepareStatement("UPDATE subtask SET title = ?, description = ?, status = ? WHERE id = ?");
         verify(mockPreparedStatement).setString(1, title);
@@ -63,7 +60,7 @@ class SubtaskRepositorySQLTest {
         String taskId = UUID.randomUUID().toString();
         Subtask subtask = new Subtask(subtaskId, title, description, status);
         //when
-        subtaskRepository.save(subtask, taskId, mockConnection);
+        subtaskRepository.save(subtask, taskId);
         //then
         verify(mockConnection).prepareStatement("INSERT INTO subtask (id, title, description, status,task_id) VALUES (?::uuid,?, ?, ?::task_status,?::uuid)");
         verify(mockPreparedStatement).setObject(1, UUID.fromString(subtaskId));
@@ -86,37 +83,11 @@ class SubtaskRepositorySQLTest {
         TaskStatus status = TaskStatus.IN_PROGRESS;
         Subtask subtask = new Subtask(subtaskId, title, description, status);
         //when
-        subtaskRepository.delete(subtask, mockConnection);
+        subtaskRepository.delete(subtask);
         //then
         verify(mockConnection).prepareStatement("DELETE FROM subtask WHERE id = ?");
         verify(mockPreparedStatement).setObject(1, UUID.fromString(subtaskId));
         verify(mockPreparedStatement).executeUpdate();
         verify(mockPreparedStatement).close();
-    }
-
-    @Test
-    void shouldSyncSubtaskCorrectly() throws SQLException {
-        String taskId = UUID.randomUUID().toString();
-        String existingId = UUID.randomUUID().toString();
-        String newId = UUID.randomUUID().toString();
-        Subtask existingSubtask = new Subtask(existingId, "Old", "Desc", TaskStatus.NEW);
-        Subtask updatedSubtask = new Subtask(existingId, "Updated", "Desc", TaskStatus.IN_PROGRESS);
-        Subtask newSubtask = new Subtask(newId, "New", "Desc", TaskStatus.DONE);
-        Set<Subtask> existing = new LinkedHashSet<>(Set.of(existingSubtask));
-        Set<Subtask> incoming = new LinkedHashSet<>(Set.of(updatedSubtask, newSubtask));
-        Task task = new Task(taskId, "Title", "Desc", TaskStatus.NEW, null, null, (LinkedHashSet<Subtask>) incoming);
-        SubtaskRepository subtaskRepository = spy(new SubtaskRepositorySQL());
-        doReturn(existing).when(subtaskRepository).getSubtasksByTaskId(taskId, mockConnection);
-        doNothing().when(subtaskRepository).update(any(Subtask.class), eq(mockConnection));
-        doNothing().when(subtaskRepository).save(any(Subtask.class), eq(taskId), eq(mockConnection));
-        doNothing().when(subtaskRepository).delete(any(Subtask.class), eq(mockConnection));
-        //when
-        subtaskRepository.syncSubtasks(task, mockConnection);
-        //then
-        verify(subtaskRepository).update(eq(updatedSubtask), eq(mockConnection));
-        verify(subtaskRepository).save(eq(newSubtask), eq(taskId), eq(mockConnection));
-        verify(subtaskRepository, never()).delete(eq(updatedSubtask), eq(mockConnection));
-        verify(subtaskRepository, never()).delete(eq(newSubtask), eq(mockConnection));
-        verify(subtaskRepository, never()).delete(eq(existingSubtask), eq(mockConnection));
     }
 }

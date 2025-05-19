@@ -5,7 +5,6 @@ import domen.domain.model.Subtask;
 import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 
-import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -22,53 +21,57 @@ public class TaskService {
         this.subtaskService = subtaskService;
     }
 
-    public Task create(String title, String description, Connection connection) {
-        return buildAndSaveTask(title, description, null, null, connection);
+    public Task create(String title, String description) {
+        return buildAndSaveTask(title, description, null, null);
     }
 
-    public Task create(String title, String description, LocalDateTime startDateTime, LocalDateTime finishDateTime, Connection connection) {
+    public Task create(String title, String description, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
         validateTaskDateTime(startDateTime, finishDateTime);
-        return buildAndSaveTask(title, description, startDateTime, finishDateTime, connection);
+        return buildAndSaveTask(title, description, startDateTime, finishDateTime);
     }
 
-    public Task update(String id, String newTitle, String newDescription, TaskStatus newStatus, Connection connection) {
-        Task task = getTask(id, connection);
-        if (newStatus == TaskStatus.DONE && !subtaskService.areAllSubtasksDone(task.id(), connection)) {
+    public Task update(String id, String newTitle, String newDescription, TaskStatus newStatus) {
+        Task task = getTask(id);
+        if (newStatus == TaskStatus.DONE && !subtaskService.areAllSubtasksDone(task.id())) {
             throw new IllegalStateException("Cannot mark task as DONE when not all subtasks are DONE");
         }
         Task updatedTask = task.copyWithUpdate(newTitle, newDescription, newStatus);
-        taskRepository.update(updatedTask, connection);
-        subtaskService.syncSubtasks(updatedTask.id(), updatedTask.subtasks(), connection);
+        taskRepository.update(updatedTask);
+        subtaskService.syncSubtasks(updatedTask.id(), updatedTask.subtasks());
         return updatedTask;
     }
 
-    public Task assignTime(String id, LocalDateTime startDateTime, LocalDateTime finishDateTime, Connection connection) {
+    public Task assignTime(String id, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
         validateTaskDateTime(startDateTime, finishDateTime);
-        Task updatedTask = getTask(id, connection).copyWithUpdate(startDateTime, finishDateTime);
-        taskRepository.update(updatedTask, connection);
+        Task updatedTask = getTask(id).copyWithUpdate(startDateTime, finishDateTime);
+        taskRepository.update(updatedTask);
         return updatedTask;
     }
 
-    public List<Task> getAllTasks(Connection connection) {
-        return taskRepository.getAll(connection);
+    public List<Task> getAllTasks() {
+        return taskRepository.getAll();
     }
 
-    public List<Task> getCompletedTasks(Connection connection) {
-        return filterTasks(Task::isCompleted, connection);
+    public List<Task> getCompletedTasks() {
+        return filterTasks(Task::isCompleted);
     }
 
-    public List<Task> getOverdueTasks(Connection connection) {
-        return filterTasks(Task::isOverdue, connection);
+    public List<Task> getActiveTasks() {
+        return filterTasks(Task::isActive);
     }
 
-    private List<Task> filterTasks(Predicate<Task> predicate, Connection connection) {
-        return taskRepository.getAll(connection).stream()
+    public List<Task> getOverdueTasks() {
+        return filterTasks(Task::isOverdue);
+    }
+
+    private List<Task> filterTasks(Predicate<Task> predicate) {
+        return taskRepository.getAll().stream()
                 .filter(predicate)
                 .collect(Collectors.toList());
     }
 
     private Task buildAndSaveTask(String title, String description,
-                                  LocalDateTime startDateTime, LocalDateTime finishDateTime, Connection connection) {
+                                  LocalDateTime startDateTime, LocalDateTime finishDateTime) {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Title cannot be null or empty");
         }
@@ -81,15 +84,15 @@ public class TaskService {
                 finishDateTime,
                 subtasks
         );
-        taskRepository.save(task, connection);
+        taskRepository.save(task);
         return task;
     }
 
-    private Task getTask(String id, Connection connection) {
+    private Task getTask(String id) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("ID cannot be null or empty");
         }
-        return taskRepository.findById(id, connection)
+        return taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task with id " + id + " not found"));
     }
 

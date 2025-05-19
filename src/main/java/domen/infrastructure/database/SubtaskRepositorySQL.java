@@ -4,10 +4,7 @@ import domen.domain.SubtaskRepository;
 import domen.domain.model.Subtask;
 import domen.domain.model.TaskStatus;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 public class SubtaskRepositorySQL implements SubtaskRepository {
@@ -20,10 +17,31 @@ public class SubtaskRepositorySQL implements SubtaskRepository {
             "DELETE FROM subtask WHERE id = ?";
     private static final String SELECT_SUBTASKS_BY_TASK_ID_STATEMENT =
             "SELECT id, title, description, status FROM subtask WHERE task_id = ?::uuid";
+    Connection externalConnection;
+
+    private Connection getConnection() throws SQLException {
+        if (externalConnection != null) {
+            return externalConnection;
+        }
+        return DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/TaskManager",
+                "admin",
+                "admin"
+        );
+    }
+
+    public SubtaskRepositorySQL() {
+        this.externalConnection = null;
+    }
+
+    public SubtaskRepositorySQL(Connection connection) {
+        this.externalConnection = connection;
+    }
 
     @Override
-    public void update(Subtask subtask, Connection connection) {
-        try (PreparedStatement ps = connection.prepareStatement(UPDATE_SUBTASK_STATEMENT)) {
+    public void update(Subtask subtask) {
+        try (Connection connection = getConnection();
+             PreparedStatement ps = connection.prepareStatement(UPDATE_SUBTASK_STATEMENT)) {
             ps.setString(1, subtask.title());
             ps.setString(2, subtask.description());
             ps.setString(3, subtask.status().toString());
@@ -35,8 +53,9 @@ public class SubtaskRepositorySQL implements SubtaskRepository {
     }
 
     @Override
-    public void save(Subtask subtask, String taskId, Connection connection) {
-        try (PreparedStatement ps = connection.prepareStatement(SAVE_SUBTASK_STATEMENT)) {
+    public void save(Subtask subtask, String taskId) {
+        try (Connection connection = getConnection();
+             PreparedStatement ps = connection.prepareStatement(SAVE_SUBTASK_STATEMENT)) {
             ps.setObject(1, UUID.fromString(subtask.id()));
             ps.setString(2, subtask.title());
             ps.setString(3, subtask.description());
@@ -49,8 +68,9 @@ public class SubtaskRepositorySQL implements SubtaskRepository {
     }
 
     @Override
-    public void delete(Subtask oldSubtask, Connection connection) {
-        try (PreparedStatement ps = connection.prepareStatement(DELETE_SUBTASK_STATEMENT)) {
+    public void delete(Subtask oldSubtask) {
+        try (Connection connection = getConnection();
+             PreparedStatement ps = connection.prepareStatement(DELETE_SUBTASK_STATEMENT)) {
             ps.setObject(1, UUID.fromString(oldSubtask.id()));
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -59,9 +79,10 @@ public class SubtaskRepositorySQL implements SubtaskRepository {
     }
 
     @Override
-    public Set<Subtask> getSubtasksByTaskId(String taskId, Connection connection) {
+    public Set<Subtask> getSubtasksByTaskId(String taskId) {
         Set<Subtask> subtasks = new LinkedHashSet<>();
-        try (PreparedStatement ps = connection.prepareStatement(SELECT_SUBTASKS_BY_TASK_ID_STATEMENT)) {
+        try (Connection connection = getConnection();
+             PreparedStatement ps = connection.prepareStatement(SELECT_SUBTASKS_BY_TASK_ID_STATEMENT)) {
             ps.setObject(1, UUID.fromString(taskId));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

@@ -4,7 +4,6 @@ import domen.domain.exception.TaskNotFoundException;
 import domen.domain.model.Subtask;
 import domen.domain.model.TaskStatus;
 
-import java.sql.Connection;
 import java.util.*;
 
 public class SubtaskService {
@@ -16,37 +15,37 @@ public class SubtaskService {
         this.taskRepository = taskRepository;
     }
 
-    Set<Subtask> getSubtasks(String taskId, Connection connection) {
-        validateTaskExists(taskId, connection);
-        return subtaskRepository.getSubtasksByTaskId(taskId, connection);
+    Set<Subtask> getSubtasks(String taskId) {
+        validateTaskExists(taskId);
+        return subtaskRepository.getSubtasksByTaskId(taskId);
     }
 
-    Subtask getSubtask(String taskId, String subtaskId, Connection connection) {
-        return getSubtasks(taskId, connection).stream()
+    Subtask getSubtask(String taskId, String subtaskId) {
+        return getSubtasks(taskId).stream()
                 .filter(subtask -> subtask.id().equals(subtaskId))
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("Subtask not found subtask_id:" + subtaskId));
     }
 
-    void addSubtask(String taskId, Subtask subtask, Connection connection) {
-        validateTaskExists(taskId, connection);
-        subtaskRepository.save(subtask, taskId, connection);
+    void saveSubtask(String taskId, Subtask subtask) {
+        validateTaskExists(taskId);
+        subtaskRepository.save(subtask, taskId);
     }
 
-    void updateSubtask(String taskId, Subtask subtask, Connection connection) {
-        validateTaskExists(taskId, connection);
-        subtaskRepository.update(subtask, connection);
+    void updateSubtask(String taskId, Subtask subtask) {
+        validateTaskExists(taskId);
+        subtaskRepository.update(subtask);
     }
 
-    void deleteSubtask(String taskId, String subtaskId, Connection connection) {
-        validateTaskExists(taskId, connection);
-        Subtask subtask = getSubtask(taskId, subtaskId, connection);
-        subtaskRepository.delete(subtask, connection);
+    void deleteSubtask(String taskId, String subtaskId) {
+        validateTaskExists(taskId);
+        Subtask subtask = getSubtask(taskId, subtaskId);
+        subtaskRepository.delete(subtask);
     }
 
-    void syncSubtasks(String taskId, Set<Subtask> incomingSubtasks, Connection connection) {
-        validateTaskExists(taskId, connection);
-        Set<Subtask> existingSubtasks = subtaskRepository.getSubtasksByTaskId(taskId, connection);
+    void syncSubtasks(String taskId, Set<Subtask> incomingSubtasks) {
+        validateTaskExists(taskId);
+        Set<Subtask> existingSubtasks = subtaskRepository.getSubtasksByTaskId(taskId);
         Map<String, Subtask> existingSubtaskMap = new HashMap<>();
         for (Subtask subtask : existingSubtasks) {
             existingSubtaskMap.put(subtask.id(), subtask);
@@ -55,24 +54,24 @@ public class SubtaskService {
         for (Subtask subtask : incomingSubtasks) {
             incomingIds.add(subtask.id());
             if (existingSubtaskMap.containsKey(subtask.id())) {
-                subtaskRepository.update(subtask, connection);
+                subtaskRepository.update(subtask);
             } else {
-                subtaskRepository.save(subtask, taskId, connection);
+                subtaskRepository.save(subtask, taskId);
             }
         }
         for (Subtask oldSubtask : existingSubtasks) {
             if (!incomingIds.contains(oldSubtask.id())) {
-                subtaskRepository.delete(oldSubtask, connection);
+                subtaskRepository.delete(oldSubtask);
             }
         }
     }
 
-    boolean areAllSubtasksDone(String taskId, Connection connection) {
-        return getSubtasks(taskId, connection).stream()
+    boolean areAllSubtasksDone(String taskId) {
+        return getSubtasks(taskId).stream()
                 .allMatch(subtask -> subtask.status().equals(TaskStatus.DONE));
     }
 
-    private void validateTaskExists(String taskId, Connection connection) {
-        taskRepository.findById(taskId, connection).orElseThrow(() -> new TaskNotFoundException(taskId));
+    private void validateTaskExists(String taskId) {
+        taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
     }
 }
