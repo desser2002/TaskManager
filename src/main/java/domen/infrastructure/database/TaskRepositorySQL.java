@@ -7,7 +7,11 @@ import domen.domain.model.Task;
 import domen.domain.model.TaskStatus;
 
 import java.sql.*;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.*;
+
+import static java.sql.Date.*;
 
 public class TaskRepositorySQL implements TaskRepository {
     private static final String SAVE_STATEMENT =
@@ -19,6 +23,14 @@ public class TaskRepositorySQL implements TaskRepository {
             "UPDATE task SET title=?, description=?, status=?, start_date_time=?,finish_date_time=? WHERE id=?";
     private static final String SELECT_ALL_STATEMENT =
             "SELECT id,title,description,status,start_date_time,finish_date_time FROM task";
+    private static final String SELECT_DELAYED_TASKS =
+            "SELECT id,title,description,status,start_date_time,finish_date_time FROM task " +
+                    "WHERE status!='DONE' AND finish_date_time<now()";
+    private static final String SELECT_TASKS_BY_STATUS =
+            "SELECT id,title,description,status,start_date_time,finish_date_time " +
+                    "FROM task WHERE status=?::task_status ";
+    private static final String SELECT_COUNT_TASKS_DONE_AT_WEEK = "SELECT COUNT(*) FROM task " +
+            "WHERE status='DONE' AND finish_date_time>=?::date AND finish_date_time<(?::date + interval '7 days') ";
     private final SubtaskRepository subtaskRepository;
     private final Connection externalConnection;
 
@@ -93,6 +105,62 @@ public class TaskRepositorySQL implements TaskRepository {
             throw new RuntimeException(e);
         }
         return tasks;
+    }
+
+    @Override
+    public List<Task> getDelayedTasks() {
+        List<Task> delayedTasks = new ArrayList<>();
+        try (
+                Connection connection = getConnection();
+                PreparedStatement ps = connection.prepareStatement(SELECT_DELAYED_TASKS);
+                ResultSet rs = ps.executeQuery()
+        ) {
+            while (rs.next()) {
+                mapRowToTaskWithSubtasks(rs);
+                delayedTasks.add(mapRowToTaskWithSubtasks(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error during getting delayed tasks", e);
+        }
+        return delayedTasks;
+    }
+
+    @Override
+    public List<Task> getTasksByStatus(TaskStatus status) {
+        List<Task> tasks = new ArrayList<>();
+        try (Connection connection = getConnection();
+             PreparedStatement ps = connection.prepareStatement(SELECT_TASKS_BY_STATUS)) {
+            ps.setString(1, status.name());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Task task = mapRowToTaskWithSubtasks(rs);
+                    tasks.add(task);
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return tasks;
+    }
+
+    @Override
+    public long countTaskDoneAtWeek(LocalDate dateInWeek) {
+        LocalDate monday = dateInWeek.with(DayOfWeek.MONDAY);
+        try (Connection connection = getConnection();
+             PreparedStatement ps = connection.prepareStatement(SELECT_COUNT_TASKS_DONE_AT_WEEK)) {
+            ps.setDate(1, valueOf(monday));
+            ps.setDate(2, valueOf(monday.plusDays(7)));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
     }
 
     private void bindTaskFields(PreparedStatement ps, Task task, int offset) throws SQLException {
