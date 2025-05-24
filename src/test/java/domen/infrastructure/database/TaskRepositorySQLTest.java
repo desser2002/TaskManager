@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -129,5 +130,58 @@ class TaskRepositorySQLTest {
         verify(mockPreparedStatement).setTimestamp(eq(5), eq(Timestamp.valueOf(task.finishDateTime())));
         verify(mockPreparedStatement).setObject(eq(6), eq(UUID.fromString(task.id())));
         verify(mockPreparedStatement).executeUpdate();
+    }
+
+    @Test
+    void shouldCallExpectedSqlOnGettingDelayedTasks() throws SQLException {
+        //given
+        TaskRepositorySQL repositorySQL = new TaskRepositorySQL(subtaskRepository, mockConnection);
+        ResultSet rs = mock(ResultSet.class);
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+        when(mockPreparedStatement.executeQuery()).thenReturn(rs);
+        //when
+        repositorySQL.getDelayedTasks();
+        //then
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mockConnection).prepareStatement(sqlCaptor.capture());
+        assertEquals("SELECT id,title,description,status,start_date_time,finish_date_time FROM task " +
+                "WHERE status!='DONE' AND finish_date_time<now()", sqlCaptor.getValue());
+    }
+
+    @Test
+    void shouldCallExpectedSqlOnGettingTasksByStatus() throws SQLException {
+        //given
+        TaskRepositorySQL repositorySQL = new TaskRepositorySQL(subtaskRepository, mockConnection);
+        ResultSet rs = mock(ResultSet.class);
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+        when(mockPreparedStatement.executeQuery()).thenReturn(rs);
+        //when
+        repositorySQL.getTasksByStatus(TaskStatus.NEW);
+        repositorySQL.getTasksByStatus(TaskStatus.IN_PROGRESS);
+        repositorySQL.getTasksByStatus(TaskStatus.DONE);
+        //then
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mockConnection, times(3)).prepareStatement(sqlCaptor.capture());
+        for (String sql : sqlCaptor.getAllValues()) {
+            assertTrue(sql.contains("FROM task WHERE status=?::task_status "));
+        }
+        verify(mockPreparedStatement).setString(1, "NEW");
+        verify(mockPreparedStatement).setString(1, "IN_PROGRESS");
+        verify(mockPreparedStatement).setString(1, "DONE");
+    }
+
+    @Test
+    void shouldCallExpectedSqlOnGettingTasksDoneAtSetWeek() throws SQLException {
+        //given
+        TaskRepositorySQL repositorySQL = new TaskRepositorySQL(subtaskRepository, mockConnection);
+        ResultSet rs = mock(ResultSet.class);
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+        when(mockPreparedStatement.executeQuery()).thenReturn(rs);
+        //when
+        repositorySQL.countTaskDoneAtWeek(LocalDate.now());
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mockConnection).prepareStatement(sqlCaptor.capture());
+        assertEquals("SELECT COUNT(*) FROM task " +
+                "WHERE status='DONE' AND finish_date_time>=?::date AND finish_date_time<(?::date + interval '7 days') ", sqlCaptor.getValue());
     }
 }

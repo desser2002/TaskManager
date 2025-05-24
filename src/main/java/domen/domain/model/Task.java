@@ -1,4 +1,5 @@
 package domen.domain.model;
+
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -65,7 +66,7 @@ public record Task(String id, String title, String description, TaskStatus statu
         return copyWithUpdate(updatedSubtasks);
     }
 
-    public boolean areAllSubtaskDone(){
-        return subtasks.stream().allMatch(s->s.status().equals(TaskStatus.DONE));
+    public boolean areAllSubtaskDone() {
+        return subtasks.stream().allMatch(s -> s.status().equals(TaskStatus.DONE));
     }
 }
