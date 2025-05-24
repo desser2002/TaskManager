@@ -31,6 +31,7 @@ public class TaskRepositorySQL implements TaskRepository {
                     "FROM task WHERE status=?::task_status ";
     private static final String SELECT_COUNT_TASKS_DONE_AT_WEEK = "SELECT COUNT(*) FROM task " +
             "WHERE status='DONE' AND finish_date_time>=?::date AND finish_date_time<(?::date + interval '7 days') ";
+    private static final String DELETE_TASK = "DELETE FROM task WHERE id=?";
     private final SubtaskRepository subtaskRepository;
     private final Connection externalConnection;
 
@@ -161,6 +162,17 @@ public class TaskRepositorySQL implements TaskRepository {
             throw new RuntimeException(e);
         }
         return 0;
+    }
+
+    @Override
+    public void delete(String taskId) {
+        try (Connection connection = getConnection();
+             PreparedStatement ps = connection.prepareStatement(DELETE_TASK)) {
+            ps.setObject(1, UUID.fromString(taskId));
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to delete task with id: " + taskId, e);
+        }
     }
 
     private void bindTaskFields(PreparedStatement ps, Task task, int offset) throws SQLException {

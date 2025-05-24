@@ -21,4 +21,6 @@ public interface TaskRepository {
     List<Task> getTasksByStatus(TaskStatus status);
 
     long countTaskDoneAtWeek(LocalDate dateInWeek);
+
+    void delete(String taskId);
 }

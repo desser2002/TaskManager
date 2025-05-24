@@ -50,6 +50,15 @@ public class TaskService {
         return updatedTask;
     }
 
+    public void delete(String id) {
+        Task task = getTask(id);
+        Set<Subtask> subtasks = subtaskRepository.getSubtasksByTaskId(task.id());
+        for (Subtask subtask : subtasks) {
+            subtaskRepository.delete(subtask);
+        }
+        taskRepository.delete(task.id());
+    }
+
     public Task assignTime(String id, LocalDateTime startDateTime, LocalDateTime finishDateTime) {
         validateTaskDateTime(startDateTime, finishDateTime);
         Task updatedTask = getTask(id).copyWithUpdate(startDateTime, finishDateTime);
