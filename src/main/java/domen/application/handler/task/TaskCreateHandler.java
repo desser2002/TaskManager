@@ -1,20 +1,16 @@
 package domen.application.handler.task;
 
-import domen.application.handler.ConsoleHandler;
 import domen.domain.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
 
-public class TaskCreateHandler implements ConsoleHandler {
-    private final TaskService taskService;
-    private final Scanner scanner;
+public class TaskCreateHandler extends AbstractTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskCreateHandler.class);
 
-    public TaskCreateHandler(TaskService taskService, Scanner scanner) {
-        this.taskService = taskService;
-        this.scanner = scanner;
+    protected TaskCreateHandler(TaskService taskService, Scanner scanner, Logger logger) {
+        super(taskService, scanner, logger);
     }
 
     @Override

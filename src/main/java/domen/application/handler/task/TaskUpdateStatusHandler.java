@@ -1,6 +1,5 @@
 package domen.application.handler.task;
 
-import domen.application.handler.ConsoleHandler;
 import domen.domain.TaskService;
 import domen.domain.model.TaskStatus;
 import org.slf4j.Logger;
@@ -8,14 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
 
-public class TaskUpdateStatusHandler implements ConsoleHandler {
+public class TaskUpdateStatusHandler extends AbstractTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskUpdateStatusHandler.class);
-    private final TaskService taskService;
-    private final Scanner scanner;
 
-    public TaskUpdateStatusHandler(TaskService taskService, Scanner scanner) {
-        this.taskService = taskService;
-        this.scanner = scanner;
+    protected TaskUpdateStatusHandler(TaskService taskService, Scanner scanner, Logger logger) {
+        super(taskService, scanner, logger);
     }
 
     @Override

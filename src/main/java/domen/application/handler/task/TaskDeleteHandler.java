@@ -1,6 +1,5 @@
 package domen.application.handler.task;
 
-import domen.application.handler.ConsoleHandler;
 import domen.domain.TaskService;
 import domen.domain.exception.TaskNotFoundException;
 import org.slf4j.Logger;
@@ -8,14 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
 
-public class TaskDeleteHandler implements ConsoleHandler {
+public class TaskDeleteHandler extends AbstractTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskDeleteHandler.class);
-    private final TaskService taskService;
-    private final Scanner scanner;
 
-    public TaskDeleteHandler(TaskService taskService, Scanner scanner) {
-        this.taskService = taskService;
-        this.scanner = scanner;
+    protected TaskDeleteHandler(TaskService taskService, Scanner scanner, Logger logger) {
+        super(taskService, scanner, logger);
     }
 
     @Override
