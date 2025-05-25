@@ -46,4 +46,9 @@ public class TaskAssignTimeHandler extends AbstractTaskHandler {
             return null;
         }
     }
+
+    @Override
+    public String getCommandName() {
+        return name();
+    }
 }

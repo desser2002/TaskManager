@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import java.util.Scanner;
 
 public class TaskChangeStatusHandler extends AbstractTaskHandler {
-    protected TaskChangeStatusHandler(TaskService taskService, Scanner scanner, Logger logger) {
+    public TaskChangeStatusHandler(TaskService taskService, Scanner scanner, Logger logger) {
         super(taskService, scanner, logger);
     }
 
@@ -30,6 +30,11 @@ public class TaskChangeStatusHandler extends AbstractTaskHandler {
         } catch (IllegalArgumentException e) {
             logger.warn("⚠️ Invalid status or task not found: {}", e.getMessage());
         }
+    }
+
+    @Override
+    public String getCommandName() {
+        return name();
     }
 }
 

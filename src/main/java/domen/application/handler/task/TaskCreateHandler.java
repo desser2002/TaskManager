@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import java.util.Scanner;
 
 public class TaskCreateHandler extends AbstractTaskHandler {
-    protected TaskCreateHandler(TaskService taskService, Scanner scanner, Logger logger) {
+    public TaskCreateHandler(TaskService taskService, Scanner scanner, Logger logger) {
         super(taskService, scanner, logger);
     }
 
@@ -22,9 +22,13 @@ public class TaskCreateHandler extends AbstractTaskHandler {
         String taskName = scanner.nextLine();
         logger.info("Enter task description (optional, Enter to skip): ");
         String taskDescription = scanner.nextLine();
-        logger.info("Enter task priority: ");
         taskService.create(taskName, taskDescription);
         logger.info("Task successfully created: title='{}', description='{}'",
                 taskName, taskDescription.isBlank() ? "(empty)" : taskDescription);
+    }
+
+    @Override
+    public String getCommandName() {
+        return name();
     }
 }

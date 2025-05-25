@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import java.util.Scanner;
 
 public class TaskDeleteHandler extends AbstractTaskHandler {
-    protected TaskDeleteHandler(TaskService taskService, Scanner scanner, Logger logger) {
+    public TaskDeleteHandler(TaskService taskService, Scanner scanner, Logger logger) {
         super(taskService, scanner, logger);
     }
 
@@ -29,6 +29,11 @@ public class TaskDeleteHandler extends AbstractTaskHandler {
         } catch (Exception e) {
             logger.error("Failed to delete task: {}", e.getMessage());
         }
+    }
+
+    @Override
+    public String getCommandName() {
+        return name();
     }
 }
 

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class TaskShowAllHandler extends AbstractTaskHandler {
-    protected TaskShowAllHandler(TaskService taskService, Scanner scanner, Logger logger) {
+    public TaskShowAllHandler(TaskService taskService, Scanner scanner, Logger logger) {
         super(taskService, scanner, logger);
     }
 
@@ -23,5 +23,10 @@ public class TaskShowAllHandler extends AbstractTaskHandler {
         List<Task> tasks = taskService.getAllTasks();
         logger.info("=== LIST OF TASKS ===");
         TaskPrinter.printTable(logger, tasks);
+    }
+
+    @Override
+    public String getCommandName() {
+        return name();
     }
 }

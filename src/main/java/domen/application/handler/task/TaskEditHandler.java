@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import java.util.Scanner;
 
 public class TaskEditHandler extends AbstractTaskHandler {
-    protected TaskEditHandler(TaskService taskService, Scanner scanner, Logger logger) {
+    public TaskEditHandler(TaskService taskService, Scanner scanner, Logger logger) {
         super(taskService, scanner, logger);
     }
 
@@ -50,6 +50,11 @@ public class TaskEditHandler extends AbstractTaskHandler {
         } catch (Exception e) {
             logger.error("❌ Failed to update task: {}", e.getMessage());
         }
+    }
+
+    @Override
+    public String getCommandName() {
+        return name();
     }
 }
 
