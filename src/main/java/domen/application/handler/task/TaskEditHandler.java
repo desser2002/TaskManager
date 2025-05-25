@@ -33,7 +33,7 @@ public class TaskEditHandler extends AbstractTaskHandler {
             try {
                 newStatus = TaskStatus.valueOf(statusInput.trim().toUpperCase());
             } catch (IllegalArgumentException e) {
-                logger.warn("⚠️ Invalid status. Allowed: NEW, IN_PROGRESS, DONE.");
+                logger.warn("Invalid status. Allowed: NEW, IN_PROGRESS, DONE.");
                 return;
             }
         }
@@ -42,13 +42,13 @@ public class TaskEditHandler extends AbstractTaskHandler {
                     newTitle.isBlank() ? null : newTitle,
                     newDescription.isBlank() ? null : newDescription,
                     newStatus);
-            logger.info("✅ Task updated successfully.");
+            logger.info("Task updated successfully.");
         } catch (TaskNotFoundException e) {
-            logger.warn("⚠️ Task not found: {}", e.getMessage());
+            logger.warn("Task not found: {}", e.getMessage());
         } catch (IllegalStateException e) {
-            logger.warn("⚠️ Update error: {}", e.getMessage());
+            logger.warn("Update error: {}", e.getMessage());
         } catch (Exception e) {
-            logger.error("❌ Failed to update task: {}", e.getMessage());
+            logger.error("Failed to update task: {}", e.getMessage());
         }
     }
 

@@ -27,9 +27,9 @@ public class TaskAssignTimeHandler extends AbstractTaskHandler {
         LocalDateTime finish = readDate("Enter finish date (yyyy-MM-dd HH:mm) or leave empty:");
         try {
             taskService.assignTime(id, start, finish);
-            logger.info("✅ Task time assigned successfully.");
+            logger.info(" Task time assigned successfully.");
         } catch (IllegalArgumentException e) {
-            logger.warn("⚠️ {}", e.getMessage());
+            logger.warn("️ {}", e.getMessage());
         }
     }
 

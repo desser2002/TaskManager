@@ -26,9 +26,9 @@ public class TaskChangeStatusHandler extends AbstractTaskHandler {
         try {
             TaskStatus newStatus = TaskStatus.valueOf(statusInput.trim().toUpperCase());
             taskService.update(taskId, null, null, newStatus);
-            logger.info("✅ Status changed successfully.");
+            logger.info("Status changed successfully.");
         } catch (IllegalArgumentException e) {
-            logger.warn("⚠️ Invalid status or task not found: {}", e.getMessage());
+            logger.warn("Invalid status or task not found: {}", e.getMessage());
         }
     }
 
