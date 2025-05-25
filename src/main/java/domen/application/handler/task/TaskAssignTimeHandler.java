@@ -31,7 +31,9 @@ public class TaskAssignTimeHandler extends AbstractTaskHandler {
     private LocalDateTime readDate(String prompt) {
         logger.info(prompt);
         String input = scanner.nextLine();
-        if (input == null || input.isBlank()) return null;
+        if (input == null || input.isBlank()) {
+            return null;
+        }
         try {
             return LocalDateTime.parse(input, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         } catch (DateTimeParseException e) {
