@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 
 import java.util.Scanner;
 
-public abstract class AbstractConsoleHandler {
+public abstract class AbstractConsoleHandler implements ConsoleHandler {
     protected final Scanner scanner;
     protected final Logger logger;
 

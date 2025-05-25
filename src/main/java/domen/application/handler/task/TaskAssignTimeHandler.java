@@ -14,6 +14,11 @@ public class TaskAssignTimeHandler extends AbstractTaskHandler {
     }
 
     @Override
+    public String name() {
+        return "task update time";
+    }
+
+    @Override
     public void handle() {
         logger.info("=== ASSIGN TIME TO TASK ===");
         logger.info("Enter task ID:");

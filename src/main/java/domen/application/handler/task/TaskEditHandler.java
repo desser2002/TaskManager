@@ -4,15 +4,17 @@ import domen.domain.TaskService;
 import domen.domain.exception.TaskNotFoundException;
 import domen.domain.model.TaskStatus;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
 
 public class TaskEditHandler extends AbstractTaskHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TaskEditHandler.class);
-
     protected TaskEditHandler(TaskService taskService, Scanner scanner, Logger logger) {
         super(taskService, scanner, logger);
+    }
+
+    @Override
+    public String name() {
+        return "task update";
     }
 
     @Override

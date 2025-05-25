@@ -12,6 +12,11 @@ public class TaskChangeStatusHandler extends AbstractTaskHandler {
     }
 
     @Override
+    public String name() {
+        return "task update status";
+    }
+
+    @Override
     public void handle() {
         logger.info("=== CHANGE TASK STATUS ===");
         logger.info("Enter task ID:");
