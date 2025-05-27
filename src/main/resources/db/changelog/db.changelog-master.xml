@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+          http://www.liquibase.org/xml/ns/dbchangelog
+          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="0" author="bovadzianis">
+        <sql>
+            CREATE TYPE task_status AS ENUM ('NEW', 'IN_PROGRESS', 'DONE');
+        </sql>
+    </changeSet>
+
+    <changeSet id="1" author="bovadzianis">
+        <createTable tableName="task">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="status" type="task_status"/>
+            <column name="start_date_time" type="timestamp"/>
+            <column name="finish_date_time" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="bovadzianis">
+        <createTable tableName="subtask">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="status" type="task_status"/>
+            <column name="task_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="bovadzianis">
+        <addForeignKeyConstraint
+                baseTableName="subtask"
+                baseColumnNames="task_id"
+                constraintName="fk_subtask_task"
+                referencedTableName="task"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

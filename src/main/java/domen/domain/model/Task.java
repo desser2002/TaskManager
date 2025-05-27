@@ -2,7 +2,6 @@ package domen.domain.model;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public record Task(String id, String title, String description, TaskStatus status, LocalDateTime startDateTime,
