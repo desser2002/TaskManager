@@ -5,5 +5,5 @@ public interface ConsoleHandler {
 
     void handle();
 
-    public String getCommandName();
+    String getCommandName();
 }

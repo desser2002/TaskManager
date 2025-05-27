@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class ConsoleApplication {
-    private static Logger logger = LoggerFactory.getLogger(ConsoleApplication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleApplication.class);
     private final Map<String, ConsoleHandler> handlers = new HashMap<>();
     private final Scanner scanner = new Scanner(System.in);
 
@@ -26,12 +26,12 @@ public class ConsoleApplication {
 
     private void registerHandlers(TaskService taskService, TaskReportService reportService, SubtaskService subtaskService) {
         List<ConsoleHandler> list = List.of(
-                new TaskCreateHandler(taskService, scanner, logger),
-                new TaskShowAllHandler(taskService, scanner, logger),
+                new TaskCreateHandler(taskService, scanner, LOGGER),
+                new TaskShowAllHandler(taskService, scanner, LOGGER),
                 new TaskAssignTimeHandler(taskService, scanner),
-                new TaskEditHandler(taskService, scanner, logger),
-                new TaskDeleteHandler(taskService, scanner, logger),
-                new TaskChangeStatusHandler(taskService, scanner, logger)
+                new TaskEditHandler(taskService, scanner, LOGGER),
+                new TaskDeleteHandler(taskService, scanner, LOGGER),
+                new TaskChangeStatusHandler(taskService, scanner, LOGGER)
         );
         for (ConsoleHandler handler : list) {
             handlers.put(handler.getCommandName(), handler);
@@ -39,28 +39,28 @@ public class ConsoleApplication {
     }
 
     public void run() {
-        logger.info("=== TASK MANAGER ===");
+        LOGGER.info("=== TASK MANAGER ===");
         while (true) {
-            logger.info("Enter command (or 'exit'):");
+            LOGGER.info("Enter command (or 'exit'):");
             String input = scanner.nextLine().trim();
             if (input.equalsIgnoreCase("exit")) {
-                logger.info("Exiting...");
+                LOGGER.info("Exiting...");
                 break;
             }
             ConsoleHandler handler = handlers.get(input);
             if (handler != null) {
                 handler.handle();
             } else {
-                logger.warn("Unknown command: {}", input);
+                LOGGER.warn("Unknown command: {}", input);
                 printAvailableCommands();
             }
         }
     }
 
     private void printAvailableCommands() {
-        logger.info("Available commands:");
+        LOGGER.info("Available commands:");
         for (String cmd : handlers.keySet()) {
-            logger.info(" - {}", cmd);
+            LOGGER.info(" - {}", cmd);
         }
     }
 }

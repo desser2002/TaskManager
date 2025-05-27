@@ -6,13 +6,13 @@
           http://www.liquibase.org/xml/ns/dbchangelog
           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="0" author="you">
+    <changeSet id="0" author="bovadzianis">
         <sql>
             CREATE TYPE task_status AS ENUM ('NEW', 'IN_PROGRESS', 'DONE');
         </sql>
     </changeSet>
 
-    <changeSet id="1" author="you">
+    <changeSet id="1" author="bovadzianis">
         <createTable tableName="task">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
@@ -27,7 +27,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="2" author="you">
+    <changeSet id="2" author="bovadzianis">
         <createTable tableName="subtask">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
@@ -43,7 +43,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="3" author="you">
+    <changeSet id="3" author="bovadzianis">
         <addForeignKeyConstraint
                 baseTableName="subtask"
                 baseColumnNames="task_id"
