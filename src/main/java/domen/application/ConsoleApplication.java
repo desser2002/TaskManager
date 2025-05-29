@@ -1,6 +1,7 @@
 package domen.application;
 
 import domen.application.handler.ConsoleHandler;
+import domen.application.handler.subtask.*;
 import domen.application.handler.task.*;
 import domen.domain.SubtaskService;
 import domen.domain.TaskReportService;
@@ -24,8 +25,14 @@ public class ConsoleApplication {
         registerHandlers(taskService, reportService, subtaskService);
     }
 
-    private void registerHandlers(TaskService taskService, TaskReportService reportService, SubtaskService subtaskService) {
-        List<ConsoleHandler> list = List.of(
+    private void registerHandlers(TaskService taskService,
+                                  TaskReportService reportService, SubtaskService subtaskService) {
+        registerTaskHandlers(taskService);
+        registerSubtaskHandlers(subtaskService);
+    }
+
+    private void registerTaskHandlers(TaskService taskService) {
+        List<ConsoleHandler> taskHandlers = List.of(
                 new TaskCreateHandler(taskService, scanner, LOGGER),
                 new TaskShowAllHandler(taskService, scanner, LOGGER),
                 new TaskAssignTimeHandler(taskService, scanner),
@@ -33,7 +40,22 @@ public class ConsoleApplication {
                 new TaskDeleteHandler(taskService, scanner, LOGGER),
                 new TaskChangeStatusHandler(taskService, scanner, LOGGER)
         );
-        for (ConsoleHandler handler : list) {
+        registerHandlerList(taskHandlers);
+    }
+
+    private void registerSubtaskHandlers(SubtaskService subtaskService) {
+        List<ConsoleHandler> subtaskHandlers = List.of(
+                new SubtaskAddHandler(subtaskService, scanner, LOGGER),
+                new SubtaskDeleteHandler(subtaskService, scanner, LOGGER),
+                new SubtaskShowAllHandler(subtaskService, scanner, LOGGER),
+                new SubtaskShowHandler(subtaskService, scanner, LOGGER),
+                new SubtaskUpdateHandler(subtaskService, scanner, LOGGER)
+        );
+        registerHandlerList(subtaskHandlers);
+    }
+
+    private void registerHandlerList(List<ConsoleHandler> handlerList) {
+        for (ConsoleHandler handler : handlerList) {
             handlers.put(handler.getCommandName(), handler);
         }
     }
