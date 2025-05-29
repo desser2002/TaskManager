@@ -12,4 +12,6 @@ public interface SubtaskRepository {
     void delete(Subtask oldSubtask);
 
     Set<Subtask> getSubtasksByTaskId(String taskId);
+
+    void move(String subtaskId, String newTaskId);
 }

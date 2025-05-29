@@ -17,6 +17,7 @@ public class SubtaskRepositorySQL implements SubtaskRepository {
             "DELETE FROM subtask WHERE id = ?";
     private static final String SELECT_SUBTASKS_BY_TASK_ID_STATEMENT =
             "SELECT id, title, description, status FROM subtask WHERE task_id = ?::uuid";
+    private static final String UPDATE_SUBTASK_TASK_ID = "UPDATE subtask SET task_id = ?::uuid WHERE id = ?::uuid";
     Connection externalConnection;
 
     private Connection getConnection() throws SQLException {
@@ -93,6 +94,18 @@ public class SubtaskRepositorySQL implements SubtaskRepository {
             throw new RuntimeException(e);
         }
         return subtasks;
+    }
+
+    @Override
+    public void move(String subtaskId, String newTaskId) {
+        try (Connection connection = getConnection();
+             PreparedStatement ps = connection.prepareStatement(UPDATE_SUBTASK_TASK_ID)) {
+            ps.setObject(1, newTaskId);
+            ps.setObject(2, UUID.fromString(subtaskId));
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Subtask mapRowToSubtask(ResultSet rs) throws SQLException {

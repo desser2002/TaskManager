@@ -44,6 +44,17 @@ public class SubtaskService {
         subtaskRepository.delete(subtask);
     }
 
+    public void moveSubtaskToAnotherTask(String subtaskId, String newTaskId) {
+        if (subtaskId == null || subtaskId.isBlank()) {
+            throw new IllegalArgumentException("Subtask ID cannot be null or empty");
+        }
+        if (newTaskId == null || newTaskId.isBlank()) {
+            throw new IllegalArgumentException("Target Task ID cannot be null or empty");
+        }
+        validateTaskExists(newTaskId);
+        subtaskRepository.move(subtaskId, newTaskId);
+    }
+
     boolean areAllSubtasksDone(String taskId) {
         return getSubtasks(taskId).stream()
                 .allMatch(subtask -> subtask.status().equals(TaskStatus.DONE));
