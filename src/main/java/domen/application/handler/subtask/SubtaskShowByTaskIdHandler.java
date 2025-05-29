@@ -7,14 +7,14 @@ import org.slf4j.Logger;
 import java.util.Scanner;
 import java.util.Set;
 
-public class SubtaskShowAllHandler extends AbstractSubtaskHandler {
-    public SubtaskShowAllHandler(SubtaskService subtaskService, Scanner scanner, Logger logger) {
+public class SubtaskShowByTaskIdHandler extends AbstractSubtaskHandler {
+    public SubtaskShowByTaskIdHandler(SubtaskService subtaskService, Scanner scanner, Logger logger) {
         super(scanner, logger, subtaskService);
     }
 
     @Override
     public String name() {
-        return "subtask all";
+        return "subtask task";
     }
 
     @Override

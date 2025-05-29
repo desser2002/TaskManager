@@ -47,7 +47,7 @@ public class ConsoleApplication {
         List<ConsoleHandler> subtaskHandlers = List.of(
                 new SubtaskAddHandler(subtaskService, scanner, LOGGER),
                 new SubtaskDeleteHandler(subtaskService, scanner, LOGGER),
-                new SubtaskShowAllHandler(subtaskService, scanner, LOGGER),
+                new SubtaskShowByTaskIdHandler(subtaskService, scanner, LOGGER),
                 new SubtaskShowHandler(subtaskService, scanner, LOGGER),
                 new SubtaskUpdateHandler(subtaskService, scanner, LOGGER)
         );

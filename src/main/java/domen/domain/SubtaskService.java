@@ -15,30 +15,30 @@ public class SubtaskService {
         this.taskRepository = taskRepository;
     }
 
-    Set<Subtask> getSubtasks(String taskId) {
+    public Set<Subtask> getSubtasks(String taskId) {
         validateTaskExists(taskId);
         return subtaskRepository.getSubtasksByTaskId(taskId);
     }
 
-    Subtask getSubtask(String taskId, String subtaskId) {
+    public Subtask getSubtask(String taskId, String subtaskId) {
         return getSubtasks(taskId).stream()
                 .filter(subtask -> subtask.id().equals(subtaskId))
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("Subtask not found subtask_id:" + subtaskId));
     }
 
-    void saveSubtask(String taskId, String title, String description) {
+    public void saveSubtask(String taskId, String title, String description) {
         validateTaskExists(taskId);
         Subtask subtask = new Subtask(UUID.randomUUID().toString(), title, description, TaskStatus.NEW);
         subtaskRepository.save(subtask, taskId);
     }
 
-    void updateSubtask(String taskId, Subtask subtask) {
+    public void updateSubtask(String taskId, Subtask subtask) {
         validateTaskExists(taskId);
         subtaskRepository.update(subtask);
     }
 
-    void deleteSubtask(String taskId, String subtaskId) {
+    public void deleteSubtask(String taskId, String subtaskId) {
         validateTaskExists(taskId);
         Subtask subtask = getSubtask(taskId, subtaskId);
         subtaskRepository.delete(subtask);
