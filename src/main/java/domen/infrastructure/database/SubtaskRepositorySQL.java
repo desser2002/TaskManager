@@ -100,7 +100,7 @@ public class SubtaskRepositorySQL implements SubtaskRepository {
     public void move(String subtaskId, String newTaskId) {
         try (Connection connection = getConnection();
              PreparedStatement ps = connection.prepareStatement(UPDATE_SUBTASK_TASK_ID)) {
-            ps.setObject(1, newTaskId);
+            ps.setObject(1, UUID.fromString(newTaskId));
             ps.setObject(2, UUID.fromString(subtaskId));
             ps.executeUpdate();
         } catch (SQLException e) {

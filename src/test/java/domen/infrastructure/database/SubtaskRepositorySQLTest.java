@@ -90,4 +90,20 @@ class SubtaskRepositorySQLTest {
         verify(mockPreparedStatement).executeUpdate();
         verify(mockPreparedStatement).close();
     }
+
+    @Test
+    void shouldMoveSubtask() throws SQLException {
+        //given
+        String subtaskId = UUID.randomUUID().toString();
+        String newTaskId = UUID.randomUUID().toString();
+        SubtaskRepository subtaskRepository = new SubtaskRepositorySQL(mockConnection);
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+        //when
+        subtaskRepository.move(subtaskId, newTaskId);
+        verify(mockConnection).prepareStatement("UPDATE subtask SET task_id = ?::uuid WHERE id = ?::uuid");
+        verify(mockPreparedStatement).setObject(1, UUID.fromString(newTaskId));
+        verify(mockPreparedStatement).setObject(2, UUID.fromString(subtaskId));
+        verify(mockPreparedStatement).executeUpdate();
+        verify(mockPreparedStatement).close();
+    }
 }
