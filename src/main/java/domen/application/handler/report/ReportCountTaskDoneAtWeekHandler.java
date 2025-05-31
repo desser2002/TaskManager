@@ -8,7 +8,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class ReportCountTaskDoneAtWeekHandler extends AbstractReportHandler {
-    protected ReportCountTaskDoneAtWeekHandler(TaskReportService taskReportService, Scanner scanner, Logger logger) {
+    public ReportCountTaskDoneAtWeekHandler(TaskReportService taskReportService, Scanner scanner, Logger logger) {
         super(taskReportService, scanner, logger);
     }
 

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ReportTasksByStatusHandler extends AbstractReportHandler {
-    protected ReportTasksByStatusHandler(TaskReportService taskReportService, Scanner scanner, Logger logger) {
+    public ReportTasksByStatusHandler(TaskReportService taskReportService, Scanner scanner, Logger logger) {
         super(taskReportService, scanner, logger);
     }
 

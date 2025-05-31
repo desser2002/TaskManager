@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ReportDelayedTasksHandler extends AbstractReportHandler {
-    protected ReportDelayedTasksHandler(TaskReportService taskReportService, Scanner scanner, Logger logger) {
+    public ReportDelayedTasksHandler(TaskReportService taskReportService, Scanner scanner, Logger logger) {
         super(taskReportService, scanner, logger);
     }
 
