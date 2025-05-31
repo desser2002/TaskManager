@@ -7,11 +7,10 @@ import domen.domain.model.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -106,6 +105,18 @@ class SubtaskServiceTest {
         subtaskService.deleteSubtask(taskId, subtaskId);
         //then
         verify(subtaskRepository).delete(subtask);
+    }
+
+    @Test
+    void shouldMoveSubtask() {
+        //given
+        String subtaskId = UUID.randomUUID().toString();
+        String newTaskId = UUID.randomUUID().toString();
+        when(taskRepository.findById(newTaskId)).thenReturn(Optional.of(mock(Task.class)));
+        //when
+        subtaskService.moveSubtaskToAnotherTask(subtaskId, newTaskId);
+        //then
+        verify(subtaskRepository).move(subtaskId, newTaskId);
     }
 
     @Test

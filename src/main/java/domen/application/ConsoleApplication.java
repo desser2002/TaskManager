@@ -49,7 +49,8 @@ public class ConsoleApplication {
                 new SubtaskDeleteHandler(subtaskService, scanner, LOGGER),
                 new SubtaskShowByTaskIdHandler(subtaskService, scanner, LOGGER),
                 new SubtaskShowHandler(subtaskService, scanner, LOGGER),
-                new SubtaskUpdateHandler(subtaskService, scanner, LOGGER)
+                new SubtaskUpdateHandler(subtaskService, scanner, LOGGER),
+                new SubtaskMoveHandler(subtaskService, scanner, LOGGER)
         );
         registerHandlerList(subtaskHandlers);
     }
