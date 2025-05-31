@@ -1,6 +1,9 @@
 package domen.application;
 
 import domen.application.handler.ConsoleHandler;
+import domen.application.handler.report.ReportCountTaskDoneAtWeekHandler;
+import domen.application.handler.report.ReportDelayedTasksHandler;
+import domen.application.handler.report.ReportTasksByStatusHandler;
 import domen.application.handler.subtask.*;
 import domen.application.handler.task.*;
 import domen.domain.SubtaskService;
@@ -29,6 +32,7 @@ public class ConsoleApplication {
                                   TaskReportService reportService, SubtaskService subtaskService) {
         registerTaskHandlers(taskService);
         registerSubtaskHandlers(subtaskService);
+        registerReportHandlers(reportService);
     }
 
     private void registerTaskHandlers(TaskService taskService) {
@@ -53,6 +57,15 @@ public class ConsoleApplication {
                 new SubtaskMoveHandler(subtaskService, scanner, LOGGER)
         );
         registerHandlerList(subtaskHandlers);
+    }
+
+    private void registerReportHandlers(TaskReportService reportService) {
+        List<ConsoleHandler> reportHandlers = List.of(
+                new ReportDelayedTasksHandler(reportService, scanner, LOGGER),
+                new ReportTasksByStatusHandler(reportService, scanner, LOGGER),
+                new ReportCountTaskDoneAtWeekHandler(reportService, scanner, LOGGER)
+        );
+        registerHandlerList(reportHandlers);
     }
 
     private void registerHandlerList(List<ConsoleHandler> handlerList) {
