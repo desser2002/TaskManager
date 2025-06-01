@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import java.util.Scanner;
 
 public class TaskUpdateStatusHandler extends AbstractTaskHandler {
-    protected TaskUpdateStatusHandler(TaskService taskService, Scanner scanner, Logger logger) {
+    public TaskUpdateStatusHandler(TaskService taskService, Scanner scanner, Logger logger) {
         super(taskService, scanner, logger);
     }
 
