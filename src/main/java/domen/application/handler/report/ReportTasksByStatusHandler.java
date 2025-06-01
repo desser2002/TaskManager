@@ -42,9 +42,4 @@ public class ReportTasksByStatusHandler extends AbstractReportHandler {
             logger.error("Error generating tasks by status report: {}", e.getMessage());
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }

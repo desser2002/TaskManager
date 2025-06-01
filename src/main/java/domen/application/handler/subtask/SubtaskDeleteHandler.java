@@ -29,9 +29,4 @@ public class SubtaskDeleteHandler extends AbstractSubtaskHandler {
             logger.warn("Failed to delete subtask: {}", e.getMessage());
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }

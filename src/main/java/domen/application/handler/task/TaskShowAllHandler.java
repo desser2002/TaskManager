@@ -24,9 +24,4 @@ public class TaskShowAllHandler extends AbstractTaskHandler {
         logger.info("=== LIST OF TASKS ===");
         TaskPrinter.printTable(logger, tasks);
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }

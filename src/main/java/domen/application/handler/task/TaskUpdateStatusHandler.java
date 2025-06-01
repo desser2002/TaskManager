@@ -31,10 +31,5 @@ public class TaskUpdateStatusHandler extends AbstractTaskHandler {
             logger.warn("Invalid status value or task not found: {}", e.getMessage());
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }
 

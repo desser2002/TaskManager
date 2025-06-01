@@ -31,9 +31,4 @@ public class SubtaskAddHandler extends AbstractSubtaskHandler {
             logger.warn("Failed to add subtask: {}", e.getMessage());
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }

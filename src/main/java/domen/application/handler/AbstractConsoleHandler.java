@@ -12,4 +12,9 @@ public abstract class AbstractConsoleHandler implements ConsoleHandler {
         this.scanner = scanner;
         this.logger = logger;
     }
+
+    @Override
+    public String getCommandName() {
+        return name();
+    }
 }
