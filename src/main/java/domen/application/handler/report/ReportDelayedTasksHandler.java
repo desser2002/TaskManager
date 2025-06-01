@@ -32,9 +32,4 @@ public class ReportDelayedTasksHandler extends AbstractReportHandler {
             logger.error("Error generating delayed tasks report: {}", e.getMessage());
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }

@@ -26,9 +26,4 @@ public class TaskCreateHandler extends AbstractTaskHandler {
         logger.info("Task successfully created: title='{}', description='{}'",
                 taskName, taskDescription.isBlank() ? "(empty)" : taskDescription);
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }

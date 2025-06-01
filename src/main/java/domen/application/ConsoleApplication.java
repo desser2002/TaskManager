@@ -42,7 +42,8 @@ public class ConsoleApplication {
                 new TaskAssignTimeHandler(taskService, scanner),
                 new TaskEditHandler(taskService, scanner, LOGGER),
                 new TaskDeleteHandler(taskService, scanner, LOGGER),
-                new TaskChangeStatusHandler(taskService, scanner, LOGGER)
+                new TaskChangeStatusHandler(taskService, scanner, LOGGER),
+                new TaskUpdateStatusHandler(taskService, scanner, LOGGER)
         );
         registerHandlerList(taskHandlers);
     }

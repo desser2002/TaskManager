@@ -35,9 +35,4 @@ public class SubtaskShowByTaskIdHandler extends AbstractSubtaskHandler {
             logger.warn("Error: {}", e.getMessage());
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }

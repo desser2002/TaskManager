@@ -28,9 +28,4 @@ public class SubtaskMoveHandler extends AbstractSubtaskHandler {
             logger.error("Error while moving subtask: {}", e.getMessage());
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }

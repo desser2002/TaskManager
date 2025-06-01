@@ -51,10 +51,5 @@ public class TaskEditHandler extends AbstractTaskHandler {
             logger.error("Failed to update task: {}", e.getMessage());
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }
 

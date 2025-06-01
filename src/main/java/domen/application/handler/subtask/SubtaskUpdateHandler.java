@@ -39,9 +39,4 @@ public class SubtaskUpdateHandler extends AbstractSubtaskHandler {
             logger.warn("Failed to update subtask: {}", e.getMessage());
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }

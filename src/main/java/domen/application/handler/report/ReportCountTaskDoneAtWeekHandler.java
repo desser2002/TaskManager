@@ -35,9 +35,4 @@ public class ReportCountTaskDoneAtWeekHandler extends AbstractReportHandler {
             logger.error("Error generating weekly task completion report: {}", e.getMessage());
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }

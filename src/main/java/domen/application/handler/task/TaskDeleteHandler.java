@@ -30,10 +30,5 @@ public class TaskDeleteHandler extends AbstractTaskHandler {
             logger.error("Failed to delete task: {}", e.getMessage());
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return name();
-    }
 }
 
