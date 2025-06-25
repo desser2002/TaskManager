@@ -25,7 +25,8 @@ cd task-manager
 
 # Run the application
 java -jar target/task-manager.jar
-🧪 Run Tests
+
+#🧪 Run Tests
 ./mvnw test
 ℹ️ The application uses a console interface. After launch, you will be guided through task creation and management via interactive prompts.
 
