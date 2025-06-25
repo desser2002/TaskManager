@@ -47,8 +47,38 @@ The application uses a **console interface**. After launch, you will be guided t
 
 ---
 
+## 🧾 Available Commands
+
+### ✅ Task Commands
+
+* `task create` – create a new task
+* `task all` – list all tasks
+* `task update` – update task name or description
+* `task update time` – update start date or deadline
+* `task update status` – change task status (`NEW`, `IN_PROGRESS`, `DONE`)
+* `task delete` – delete a task
+
 ---
 
+### ✅ Subtask Commands
+
+* `subtask add` – add a subtask to a task
+* `subtask` – list subtasks of a task
+* `subtask update` – update subtask name or status
+* `subtask delete` – delete a subtask
+* `subtask move` – move a subtask to another task
+* `subtask task` – show parent task for a subtask
+
+---
+
+### 📊 Report Commands
+
+* `report status` – show tasks by status
+* `report delayed` – list overdue tasks
+* `report weekdone` – show tasks completed in the current week
+
+---
+ 
 ## 🧱 Project Structure & Architecture
 
 The project follows the **Hexagonal Architecture** (Ports & Adapters) principle, organizing code around clear responsibilities and separation of concerns.
