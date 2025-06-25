@@ -7,26 +7,45 @@
 ---
 Demo 
 ---
-# ⚙️ 3. Installation & Run
-✅ Requirements
-Java 17 or 21
 
-Maven (or use the provided wrapper)
 
-(Optional) PostgreSQL or H2 for persistence
+---
 
-🚀 Quick Start
-Clone the repository
+## ⚙️ 3. Installation & Run
+
+### ✅ Requirements
+
+* Java 17 or 21
+* Maven (or use the provided wrapper)
+* (Optional) PostgreSQL or H2 for persistence
+
+---
+
+### 🚀 Quick Start
+
+
+# Clone the repository
 git clone https://github.com/desser2002/TaskManager.git
 cd task-manager
 
-Build the project
+# Build the project
 ./mvnw clean install
 
-Run the application
+# Run the application
 java -jar target/task-manager.jar
 
-🧪 Run Tests
+---
+
+### 🧪 Run Tests
+
 ./mvnw test
-ℹ️ The application uses a console interface. After launch, you will be guided through task creation and management via interactive prompts.
+
+---
+
+### ℹ️ Notes
+
+The application uses a **console interface**. After launch, you will be guided through task creation and management via interactive prompts.
+
+---
+
 
