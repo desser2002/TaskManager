@@ -3,8 +3,38 @@
 - 🔒 Prevents task completion until all subtasks are marked as done. 
 - 📊 Generates reports on overdue tasks and weekly progress.
 ---
-Demo 
+
+## 🖥️ Demo
+
+```bash
+== TASK MANAGER ==
+Enter command (or 'exit'):
+
+task create
+
+==== Creating new task ====
+Enter task name:
+GitHub Demo
+Enter task description (optional, Enter to skip):
+Create demo for github readme.md file
+
+Task successfully created: title='GitHub Demo', description='Create demo for github readme.md file'
+Enter command (or 'exit'):
+
+task all
+
+=== LIST OF TASKS ===
++--------------------------------------+----------------+----------+--------+----------+
+| ID                                   | Title          | Status   | Start  | Deadline |
++--------------------------------------+----------------+----------+--------+----------+
+| 10321918-b8d5-453b-ae43-3dc2a07e6d4c | GitHub Demo    | NEW      | —      | —        |
++--------------------------------------+----------------+----------+--------+----------+
+Enter command (or 'exit'):
+```
+
 ---
+
+### 📌 Куда вставить в README:
 
 
 ---
