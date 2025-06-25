@@ -41,4 +41,3 @@ The application uses a **console interface**. After launch, you will be guided t
 
 ---
 
-```
