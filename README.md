@@ -159,7 +159,7 @@ src/
 
 For more detailed documentation, check the following resources:
 
-* 📄 [Database Schema](docs/database-schema.png)
+* 📄 [Database Schema](https://dbdiagram.io/d/Task-Manager-685c112df413ba3508d9aa6d)
 * 🧩 [Domain Class Diagram](docs/domain-model.md)
 
 ---
